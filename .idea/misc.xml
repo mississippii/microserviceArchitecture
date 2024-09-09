@@ -4,8 +4,8 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/SpringWeb/pom.xml" />
         <option value="$PROJECT_DIR$/Backend/pom.xml" />
+        <option value="$PROJECT_DIR$/Security/pom.xml" />
       </list>
     </option>
   </component>
