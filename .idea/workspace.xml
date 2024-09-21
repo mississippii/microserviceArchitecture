@@ -5,15 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/controller/WebController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/dto/MyUserDetails.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/entity/Role.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/entity/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/repository/RoleRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/repository/UserRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/services/MyUserDetailsServices.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/config/JWTAuthenticationFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/config/JwtUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/controller/AuthController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/SecurityApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/Security/src/main/java/security/SecurityApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/DarkController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Security/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Security/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Security/src/main/java/security/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/controller/WebController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/dto/MyUserDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/Security/src/main/java/security/dto/MyUserDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/services/MyUserDetailsServices.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,26 +45,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.SecurityApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.All in Backend.executor": "Debug",
+    "Maven.Security [clean].executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "Spring Boot.SecurityApplication.executor": "Run",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Spring Boot.SecurityApplication">
+}]]></component>
+  <component name="RunManager" selected="JUnit.All in Backend">
+    <configuration name="All in Backend" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Backend" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="TEST_OBJECT" value="package" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="Backend" />
@@ -75,12 +91,17 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.All in Backend" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-b114ca120d71-intellij.indexing.shared.core-IU-242.21829.142" />
-        <option value="bundled-js-predefined-d6986cc7102b-7c0b70fcd90d-JavaScript-IU-242.21829.142" />
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.22855.74" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.22855.74" />
       </set>
     </attachedChunks>
   </component>
@@ -93,7 +114,10 @@
       <option name="presentableId" value="Default" />
       <updated>1725901135593</updated>
       <workItem from="1725901136689" duration="2479000" />
-      <workItem from="1725911000306" duration="1959000" />
+      <workItem from="1725911000306" duration="2321000" />
+      <workItem from="1725945844656" duration="2459000" />
+      <workItem from="1726929696902" duration="4000000" />
+      <workItem from="1726940190761" duration="6492000" />
     </task>
     <servers />
   </component>

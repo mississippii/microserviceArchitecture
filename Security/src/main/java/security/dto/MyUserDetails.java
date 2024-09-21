@@ -1,20 +1,14 @@
 package security.dto;
 
-import jakarta.persistence.ManyToMany;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-import security.entity.Role;
 import security.entity.User;
-import security.repository.UserRepo;
-
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 
 @Data

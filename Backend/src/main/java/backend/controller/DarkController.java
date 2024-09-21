@@ -6,6 +6,7 @@ import backend.entity.Employee;
 import backend.service.AddressService;
 import backend.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -17,6 +18,11 @@ public class DarkController {
     public DarkController(AddressService addressService, EmployeeService employeeService) {
         this.addressService = addressService;
         this.employeeService = employeeService;
+    }
+
+    @GetMapping("/hello")
+    public String helloWorld() {
+        return "Hello, Dark World!";
     }
     @PostMapping("/employee-create")
     public ResponseEntity<Void> create(@RequestBody Employee employee){
