@@ -13,15 +13,12 @@ public class StudentService {
     private StudentRepository studentRepository;
 
     public void registerStudent(Student student) {
-        // Check if student already exists
         if (studentRepository.findByStudentId(student.getStudentId()) != null) {
             throw new RuntimeException("Student already exists");
         }
-        // Save student (initially inactive)
         student.setActiveStatus(false);
         studentRepository.save(student);
 
-        // Send activation email (not implemented here)
     }
 
     public Student findStudent(String studentId) {
