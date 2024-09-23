@@ -3,10 +3,11 @@ package backend.controller;
 import backend.annotations.ApiController;
 import backend.entity.Student;
 import backend.service.StudentService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 
 @ApiController()
@@ -21,13 +22,23 @@ public class StudentsController {
     public String getname(){
         return "Tanveer Hasan";
     }
-    @PostMapping("student/register")
-    public void registerStudent(@RequestBody Student student) {
-        studentService.registerStudent(student);
-    }
-
     @GetMapping("student/{studentId}")
-    public Student getStudent(@PathVariable String studentId) {
+    public ResponseEntity<Student> getStudent(@PathVariable String studentId) {
         return studentService.findStudent(studentId);
     }
+    @GetMapping("/student/all")
+    public ResponseEntity<List<Student>> getStudentList(){
+        return ResponseEntity.ok(studentService.getStudentList());
+    }
+    @GetMapping("/student/{batchYear}")
+    public ResponseEntity<List<Student>> getStudentsByBatch(@PathVariable int batchYear) {
+        List<Student> students = studentService.getstudentsbybatchyear(batchYear);
+        return ResponseEntity.ok(students);
+    }
+    @GetMapping("/student/department")
+    public ResponseEntity<List<Student>> countStudentsByDepartment() {
+        List<Student> counts = studentService.getCountOfStudentsByDepartment();
+        return ResponseEntity.ok(counts);
+    }
+
 }

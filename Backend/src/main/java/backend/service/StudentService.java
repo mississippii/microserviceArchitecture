@@ -3,6 +3,7 @@ package backend.service;
 import backend.entity.Student;
 import backend.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,16 +13,22 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
-    public void registerStudent(Student student) {
-        if (studentRepository.findByStudentId(student.getStudentId()) != null) {
-            throw new RuntimeException("Student already exists");
+    public ResponseEntity<Student> findStudent(String studentId) {
+        if (studentRepository.existsById(studentId)) {
+            return ResponseEntity.ok(studentRepository.findByStudentId(studentId));
         }
-        student.setActiveStatus(false);
-        studentRepository.save(student);
-
+        return ResponseEntity.notFound().build();
+    }
+    public List<Student> getStudentList(){
+        return studentRepository.findAll();
+    }
+    public List<Student> getstudentsbybatchyear(int batchYear) {
+        return studentRepository.findStudentsByBatchYear(batchYear);
     }
 
-    public Student findStudent(String studentId) {
-        return studentRepository.findByStudentId(studentId);
+
+    public List<Student> getCountOfStudentsByDepartment() {
+        return studentRepository.findAllStudentsOrderedByDepartment();
     }
+
 }

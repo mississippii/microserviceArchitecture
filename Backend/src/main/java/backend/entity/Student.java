@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "students")
 public class Student {
     @Id
-    @Column(name = "student_id")
+    @Column(name = "student_id", nullable = false)
     private String studentId;
 
     @Column(name = "first_name")
@@ -28,7 +28,7 @@ public class Student {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "batch_year")
+    @Column(name = "batch_year", nullable = false)
     private int batchYear;
 
     @Column(name = "occupation")
@@ -37,7 +37,7 @@ public class Student {
     @Column(name = "organization_name")
     private String organizationName;
 
-    @Column(name = "active_status", columnDefinition = "boolean default false")
+    @Column(name = "active_status", columnDefinition = "tinyint(1) default 0")
     private boolean activeStatus;
 
     @Column(name = "created_at", updatable = false)
@@ -45,6 +45,15 @@ public class Student {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "Blood_group")
+    private String bloodGroup;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "department", nullable = false)
+    private String department;
 
     @PrePersist
     protected void onCreate() {

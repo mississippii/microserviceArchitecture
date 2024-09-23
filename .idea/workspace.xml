@@ -5,38 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/DarkController.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Address.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Employee.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/AddressRepo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/EmployeeRepo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/service/AddressService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/service/EmployeeService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/SecurityApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/config/JWTAuthenticationFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/config/JwtUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/config/SecurityConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/controller/AuthController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/dto/MyUserDetails.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/entity/Role.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/entity/User.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/repository/RoleRepo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/repository/UserRepo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/services/MyUserDetailsService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/java/security/services/MyUserDetailsServices.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/main/resources/application.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Security/src/test/java/security/SecurityApplicationTests.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +46,7 @@
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Spring Boot.BackendApplication.executor": "Debug",
+    "Spring Boot.BackendApplication.executor": "Run",
     "Spring Boot.SecurityApplication.executor": "Run",
     "git-widget-placeholder": "master",
     "kotlin-language-version-configured": "true",
@@ -123,7 +97,8 @@
       <workItem from="1725945844656" duration="2459000" />
       <workItem from="1726929696902" duration="4000000" />
       <workItem from="1726940190761" duration="7011000" />
-      <workItem from="1726948081805" duration="1289000" />
+      <workItem from="1726948081805" duration="1520000" />
+      <workItem from="1727118804413" duration="2889000" />
     </task>
     <servers />
   </component>
@@ -135,23 +110,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java</url>
-          <line>30</line>
+          <line>26</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java</url>
-          <line>21</line>
+          <line>22</line>
           <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java</url>
-          <line>28</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java</url>
-          <line>26</line>
-          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
