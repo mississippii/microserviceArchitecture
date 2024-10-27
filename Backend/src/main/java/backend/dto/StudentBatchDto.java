@@ -11,4 +11,5 @@ public class StudentBatchDto {
     private String studentId;
     private String firstName;
     private String lastName;
+    private String sex;
 }

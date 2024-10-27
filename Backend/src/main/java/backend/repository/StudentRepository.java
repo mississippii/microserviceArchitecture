@@ -20,4 +20,6 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     List<Student> findAllStudentsOrderedByDepartment();
     @Query("SELECT s.batchYear, COUNT(s) FROM Student s GROUP BY s.batchYear")
     List<Object[]> countStudentsByBatchYear();
+    @Query("SELECT COUNT(s) FROM Student s")
+    int totalStudentCount();
 }

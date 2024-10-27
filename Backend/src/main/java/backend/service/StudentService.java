@@ -54,7 +54,11 @@ public class StudentService {
         List<Student> students = studentRepository.findStudentsByBatchYear(batchYear);
 
         return students.stream()
-                .map(student -> new StudentBatchDto(student.getStudentId(), student.getFirstName(), student.getLastName()))
+                .map(student -> new StudentBatchDto(student.getStudentId(), student.getFirstName(), student.getLastName(),student.getSex()))
                 .collect(Collectors.toList());
     }
+    public int getAllStudentCount(){
+        return studentRepository.totalStudentCount();
+    }
+
 }

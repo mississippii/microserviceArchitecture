@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -21,34 +22,38 @@ public class StudentsController {
         this.studentService = studentService;
     }
 
-    @GetMapping("student/name")
+    @PostMapping("student/name")
     public String getname(){
         return "Tanveer Hasan";
     }
-    @GetMapping("student/{studentId}")
+    @PostMapping("student/count")
+    public int getStudentCount(){
+        return studentService.getAllStudentCount();
+    }
+    @PostMapping("student/{studentId}")
     public ResponseEntity<Student> getStudent(@PathVariable String studentId) {
         return studentService.findStudent(studentId);
     }
-    @GetMapping("/student/all")
+    @PostMapping("/student/all")
     public ResponseEntity<List<Student>> getStudentList(){
         return ResponseEntity.ok(studentService.getStudentList());
     }
-    @GetMapping("/student/batch/{batchYear}")
+    @PostMapping("/student/batch/{batchYear}")
     public ResponseEntity<List<StudentBatchDto>> getStudentsByBatchYear(@PathVariable int batchYear) {
         List<StudentBatchDto> students = studentService.getStudentsByBatchYear(batchYear);
 
         if (students.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No content if no students found
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        return new ResponseEntity<>(students, HttpStatus.OK); // Return the list with HTTP 200
+        return new ResponseEntity<>(students, HttpStatus.OK);
     }
-    @GetMapping("/student/department")
+    @PostMapping("/student/department")
     public ResponseEntity<List<Student>> countStudentsByDepartment() {
         List<Student> counts = studentService.getCountOfStudentsByDepartment();
         return ResponseEntity.ok(counts);
     }
-    @GetMapping("/students/batchcount")
+    @PostMapping("/students/batchcount")
     public ResponseEntity<List<BatchCountDto>> getBatchCount() {
         return studentService.getStudentCountByBatchYear();
     }

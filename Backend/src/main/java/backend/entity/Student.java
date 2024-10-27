@@ -54,6 +54,8 @@ public class Student {
 
     @Column(name = "department", nullable = false)
     private String department;
+    @Column(name = "sex")
+    private String sex;
 
     @PrePersist
     protected void onCreate() {
