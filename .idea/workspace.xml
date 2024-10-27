@@ -10,19 +10,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/CustomerController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Customer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Order.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/CustomerRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/service/CustomerService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/.gitattributes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/mvnw" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/mvnw.cmd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/src/main/java/veer/apigateway/ApiGateWayApplication.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/src/main/resources/application.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/APIGateWay/src/test/java/veer/apigateway/ApiGateWayApplicationTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/.gitattributes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/mvnw" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/mvnw.cmd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/src/main/java/veer/discoveryserver/DiscoveryServerApplication.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/src/main/resources/application.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DiscoveryServer/src/test/java/veer/discoveryserver/DiscoveryServerApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/dto/StudentBatchDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/dto/StudentBatchDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/BackendApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/BackendApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -49,55 +60,97 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JUnit.All in Backend.executor&quot;: &quot;Debug&quot;,
-    &quot;Maven.Backend [clean,install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Backend [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Security [clean].executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.SecurityApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.All in Backend.executor": "Debug",
+    "Maven.Backend [clean,install].executor": "Run",
+    "Maven.Backend [clean].executor": "Run",
+    "Maven.Security [clean].executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.ApiGateWay.executor": "Run",
+    "Spring Boot.Backend.executor": "Run",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "Spring Boot.DiscoveryServer.executor": "Run",
+    "Spring Boot.DiscoveryServerApplication.executor": "Run",
+    "Spring Boot.SecurityApplication.executor": "Run",
+    "git-widget-placeholder": "master",
+    "jdk.selected.JAVA_MODULE": "21",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/veer/Documents/Java/Scoobydoo/APIGateWay",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Artifacts",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn clean install" />
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.BackendApplication">
-    <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="KtorApplicationConfigurationType" />
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.ApiGateWay">
+    <configuration name="ApiGateWay" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <module name="APIGateWay" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="veer.apigateway.ApiGateWayApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Backend" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="Backend" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="backend.BackendApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="backend.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SecurityApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-      <module name="Security" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="security.SecurityApplication" />
+    <configuration name="DiscoveryServer" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <module name="DiscoveryServer" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="veer.discoveryserver.DiscoveryServerApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Spring Boot.ApiGateWay" />
+      <item itemvalue="Spring Boot.DiscoveryServer" />
+      <item itemvalue="Spring Boot.Backend" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.Backend" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -138,6 +191,10 @@
       <workItem from="1728503077882" duration="5175000" />
       <workItem from="1728510745109" duration="825000" />
       <workItem from="1729707960724" duration="65000" />
+      <workItem from="1730042317898" duration="624000" />
+      <workItem from="1730042965692" duration="1547000" />
+      <workItem from="1730044803746" duration="2388000" />
+      <workItem from="1730051869195" duration="1460000" />
     </task>
     <servers />
   </component>
@@ -148,41 +205,14 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java</url>
-          <line>56</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java</url>
           <line>37</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/controller/CustomerController.java</url>
-          <line>30</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/controller/CustomerController.java</url>
-          <line>24</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/CustomerService.java</url>
-          <line>31</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/CustomerService.java</url>
-          <line>25</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/CustomerService.java</url>
-          <line>34</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Scoobydoo$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1730045762777" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
   </component>
 </project>

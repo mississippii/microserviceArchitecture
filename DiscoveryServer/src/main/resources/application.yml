@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: DiscoveryServer
+
+  cloud:
+    eureka:
+      client:
+        register-with-eureka: false
+        fetch-registry: false
+        service-url:
+server:
+  port: 8761
