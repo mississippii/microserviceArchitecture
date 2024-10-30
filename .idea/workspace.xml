@@ -10,31 +10,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/APIGateWay/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/src/main/java/veer/apigateway/ApiGateWayApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/src/main/resources/application.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/APIGateWay/src/test/java/veer/apigateway/ApiGateWayApplicationTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/src/main/java/veer/discoveryserver/DiscoveryServerApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/src/main/resources/application.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DiscoveryServer/src/test/java/veer/discoveryserver/DiscoveryServerApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/dto/UserDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIGateWay/src/main/java/veer/apigateway/ApiGateWayApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/APIGateWay/src/main/java/veer/apigateway/ApiGateWay.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/BackendApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/BackendApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/annotations/ApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/annotations/ApiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/config/AppConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/config/AppConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/dto/BatchCountDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/dto/BatchCountDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/Student.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/src/main/java/veer/discoveryserver/DiscoveryServerApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/DiscoveryServer/src/main/java/veer/discoveryserver/DiscoveryServer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,8 +59,8 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.ApiGateWay.executor": "Run",
-    "Spring Boot.Backend.executor": "Run",
+    "Spring Boot.ApiGateWay.executor": "Debug",
+    "Spring Boot.Backend.executor": "Debug",
     "Spring Boot.BackendApplication.executor": "Run",
     "Spring Boot.DiscoveryServer.executor": "Run",
     "Spring Boot.DiscoveryServerApplication.executor": "Run",
@@ -112,10 +99,10 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.ApiGateWay">
+  <component name="RunManager" selected="Spring Boot.Backend">
     <configuration name="ApiGateWay" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <module name="APIGateWay" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="veer.apigateway.ApiGateWayApplication" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="veer.apigateway.ApiGateWay" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -136,7 +123,7 @@
     </configuration>
     <configuration name="DiscoveryServer" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <module name="DiscoveryServer" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="veer.discoveryserver.DiscoveryServerApplication" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="veer.discoveryserver.DiscoveryServer" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -194,7 +181,9 @@
       <workItem from="1730042317898" duration="624000" />
       <workItem from="1730042965692" duration="1547000" />
       <workItem from="1730044803746" duration="2388000" />
-      <workItem from="1730051869195" duration="1460000" />
+      <workItem from="1730051869195" duration="1891000" />
+      <workItem from="1730316779227" duration="29000" />
+      <workItem from="1730316825937" duration="6578000" />
     </task>
     <servers />
   </component>
@@ -205,9 +194,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/service/StudentService.java</url>
-          <line>37</line>
-          <option name="timeStamp" value="3" />
+          <url>file://$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java</url>
+          <line>66</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

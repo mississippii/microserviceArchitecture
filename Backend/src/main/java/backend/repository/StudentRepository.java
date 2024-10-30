@@ -11,15 +11,20 @@ import java.util.List;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, String> {
-    Student findByStudentId(String studentId);
+
+    @Query("SELECT s FROM Student s WHERE s.firstName LIKE %:firstName%")
+    List<Student> findByFirstNameContaining(@Param("firstName") String firstName);
+
 
     @Query("SELECT s FROM Student s WHERE s.batchYear = :batchYear")
     List<Student> findStudentsByBatchYear(@Param("batchYear") int batchYear);
 
-    @Query("SELECT s FROM Student s ORDER BY s.department")
-    List<Student> findAllStudentsOrderedByDepartment();
+    @Query("SELECT s FROM Student s WHERE s.department = :deptName")
+    List<Student> findAllStudentsByDepartment(@Param("deptName") String deptName);
+
     @Query("SELECT s.batchYear, COUNT(s) FROM Student s GROUP BY s.batchYear")
     List<Object[]> countStudentsByBatchYear();
+
     @Query("SELECT COUNT(s) FROM Student s")
     int totalStudentCount();
 }

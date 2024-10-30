@@ -2,19 +2,19 @@ package backend.controller;
 
 import backend.annotations.ApiController;
 import backend.dto.BatchCountDto;
-import backend.dto.StudentBatchDto;
-import backend.entity.Student;
+import backend.dto.StudentDto;
+import backend.dto.UserDto;
 import backend.service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
-@ApiController()
+@RestController()
+@RequestMapping("/students")
+@CrossOrigin(value = "*")
 public class StudentsController {
     private final StudentService studentService;
 
@@ -22,40 +22,60 @@ public class StudentsController {
         this.studentService = studentService;
     }
 
-    @PostMapping("student/name")
-    public String getname(){
-        return "Tanveer Hasan";
-    }
-    @PostMapping("student/count")
+
+    @PostMapping("/count")
     public int getStudentCount(){
         return studentService.getAllStudentCount();
     }
-    @PostMapping("student/{studentId}")
-    public ResponseEntity<Student> getStudent(@PathVariable String studentId) {
-        return studentService.findStudent(studentId);
-    }
-    @PostMapping("/student/all")
-    public ResponseEntity<List<Student>> getStudentList(){
-        return ResponseEntity.ok(studentService.getStudentList());
-    }
-    @PostMapping("/student/batch/{batchYear}")
-    public ResponseEntity<List<StudentBatchDto>> getStudentsByBatchYear(@PathVariable int batchYear) {
-        List<StudentBatchDto> students = studentService.getStudentsByBatchYear(batchYear);
 
-        if (students.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @PostMapping("/find-by-id")
+    public ResponseEntity<StudentDto> getStudent(@RequestBody UserDto userDto) {
+        return studentService.getStudentById(userDto);
+    }
+    @PostMapping("/find-by-name")
+    public ResponseEntity<List<StudentDto>> getBatchStudents(@RequestBody UserDto userDto) {
+        try{
+            List<StudentDto> students = studentService.getStudentByName(userDto);
+            return ResponseEntity.ok(students);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
 
-        return new ResponseEntity<>(students, HttpStatus.OK);
+    @PostMapping("/find-all")
+    public ResponseEntity<List<StudentDto>> getStudentList(){
+        try {
+            List<StudentDto> students = studentService.getAllStudents();
+            return ResponseEntity.ok(students);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
-    @PostMapping("/student/department")
-    public ResponseEntity<List<Student>> countStudentsByDepartment() {
-        List<Student> counts = studentService.getCountOfStudentsByDepartment();
-        return ResponseEntity.ok(counts);
+
+    @PostMapping("/find-batch")
+    public ResponseEntity<List<StudentDto>> getStudentsByBatchYear(@RequestBody UserDto userDto) {
+        try {
+            List<StudentDto> students = studentService.getStudentsByYear(userDto);
+            return ResponseEntity.ok(students);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
-    @PostMapping("/students/batchcount")
+
+    @PostMapping("/department")
+    public ResponseEntity<List<StudentDto>> countStudentsByDepartment(@RequestBody UserDto userDto) {
+        List<StudentDto> students = studentService.getStudentsByDepartment(userDto);
+        return ResponseEntity.ok(students);
+    }
+
+    @PostMapping("/count-by-batch")
     public ResponseEntity<List<BatchCountDto>> getBatchCount() {
-        return studentService.getStudentCountByBatchYear();
+        try{
+            List<BatchCountDto> batchCount = studentService.getStudentCountByBatch();
+            return ResponseEntity.ok(batchCount);
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 }
