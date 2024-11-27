@@ -10,21 +10,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/APIGateWay/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/APIGateWay/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/.gitattributes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/DiscoveryServer/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/Scoobydoo_jar/Scoobydoo.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Scoobydoo.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/artifacts/Scoobydoo_jar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIGateWay/target/classes/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIGateWay/target/classes/veer/apigateway/ApiGateWay.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/META-INF/MANIFEST.MF" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/BackendApplication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/annotations/ApiController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/config/AppConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/controller/StudentsController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/BatchCountDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/StudentBatchDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/StudentDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/UserDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/entity/Student.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/repository/StudentRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/service/StudentService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/test-classes/backend/BackendApplicationTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/target/classes/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/target/classes/veer/discoveryserver/DiscoveryServer.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -195,7 +209,7 @@
       <workItem from="1730316825937" duration="7559000" />
       <workItem from="1730587119419" duration="270000" />
       <workItem from="1731006488142" duration="21000" />
-      <workItem from="1732723445598" duration="5436000" />
+      <workItem from="1732723445598" duration="5773000" />
     </task>
     <servers />
   </component>
