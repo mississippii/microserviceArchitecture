@@ -1,7 +1,6 @@
 spring:
   application:
     name: DiscoveryServer
-
   cloud:
     eureka:
       client:
@@ -10,3 +9,12 @@ spring:
         service-url:
 server:
   port: 8761
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+  client:
+    fetch-registry: false
+    refresh:
+      enable: true

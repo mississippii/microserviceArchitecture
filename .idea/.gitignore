@@ -1,0 +1,22 @@
+# Maven build directories
+target/
+
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS-specific files (Linux/Ubuntu)
+.DS_Store   # This is also generated on macOS, but you can keep it in case of cross-platform usage
+# Ubuntu specific files, like temporary swap files
+*.swp
+*~
+
+# Maven wrapper files (if using Maven wrapper)
+.mvn/
+mvnw
+mvnw.cmd
+
+# Log files
+*.log
