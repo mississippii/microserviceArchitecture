@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: Backend
 
@@ -10,7 +12,7 @@ spring:
   cloud:
     compatibility-verifier:
       enabled: false
-  #  datasource:
+#    datasource:
 #    url: jdbc:mariadb://localhost:3306/microservices
 #    username: root
 #    password: 1234
@@ -23,6 +25,17 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+  quartz:
+    scheduler:
+      instance-name: DeleteExpiredRecordsScheduler  # Set instance name
+      instance-id: AUTO                          # Set instance id to AUTO
+    job-store-type: jdbc                        # Enable JDBC job store for persistence
+    jdbc:
+      initialize-schema: always                 # Automatically create tables (if required)
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/quartz   # JDBC URL for the database
+      username: root
+      password: 1234
 server:
   port: 8081
 eureka:

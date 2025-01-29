@@ -10,8 +10,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/APIGateWay/src/main/java/veer/apigateway/Config/CrossConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/config/QuartzConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/ExpiredRecord.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/ExpireRecordRepo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/springcomponent/DeleteExpiredRecordsJob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIGateWay/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/APIGateWay/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/META-INF/MANIFEST.MF" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/BackendApplication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/annotations/ApiController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/config/AppConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/controller/StudentsController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/BatchCountDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/StudentBatchDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/StudentDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/UserDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/entity/Student.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/repository/StudentRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/service/StudentService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/target/test-classes/backend/BackendApplicationTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/DiscoveryServer/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/target/classes/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/target/classes/veer/discoveryserver/DiscoveryServer.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,41 +63,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JUnit.All in Backend.executor&quot;: &quot;Debug&quot;,
-    &quot;Maven.Backend [clean,install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Backend [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Security [clean].executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Spring Boot.ApiGateWay.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.Backend.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.DiscoveryServer.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.DiscoveryServerApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.SecurityApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;21&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/veer/Documents/Java/Scoobydoo/APIGateWay&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.All in Backend.executor": "Debug",
+    "Maven.Backend [clean,install].executor": "Run",
+    "Maven.Backend [clean].executor": "Run",
+    "Maven.DiscoveryServer [clean].executor": "Run",
+    "Maven.Security [clean].executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.ApiGateWay.executor": "Run",
+    "Spring Boot.Backend.executor": "Run",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "Spring Boot.DiscoveryServer.executor": "Run",
+    "Spring Boot.DiscoveryServerApplication.executor": "Run",
+    "Spring Boot.SecurityApplication.executor": "Run",
+    "git-widget-placeholder": "master",
+    "jdk.selected.JAVA_MODULE": "21",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/veer/Documents/Java/MsArchitecture",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -95,7 +122,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.ApiGateWay">
+  <component name="RunManager" selected="Spring Boot.Backend">
     <configuration name="ApiGateWay" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <module name="APIGateWay" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="veer.apigateway.ApiGateWay" />
@@ -138,8 +165,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.21565.193" />
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-IU-243.21565.193" />
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.153" />
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.153" />
       </set>
     </attachedChunks>
   </component>
@@ -184,6 +211,11 @@
       <workItem from="1731006488142" duration="21000" />
       <workItem from="1732723445598" duration="6377000" />
       <workItem from="1732736027750" duration="329000" />
+      <workItem from="1732789755683" duration="201000" />
+      <workItem from="1732789988147" duration="17000" />
+      <workItem from="1732792083572" duration="12000" />
+      <workItem from="1732792148576" duration="24000" />
+      <workItem from="1738147922565" duration="7777000" />
     </task>
     <servers />
   </component>

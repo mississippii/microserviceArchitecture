@@ -1,0 +1,46 @@
+# Ignore target (compiled output) folders
+**/target/
+**/out/
+
+# Ignore IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore Maven wrapper files
+.mvn/
+!**/.mvn/wrapper/maven-wrapper.jar
+
+# Ignore build-related files
+**/build/
+**/dist/
+**/bin/
+**/logs/
+**/tmp/
+
+# Ignore class files
+*.class
+
+# Ignore package managers
+node_modules/
+.yarn/
+.pnpm/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.swp
+*.swo
+*.swn
+
+# Ignore dependency directories
+
+
+# Ignore Spring Boot specific
+
+
+# Ignore application configuration files with sensitive data
+
