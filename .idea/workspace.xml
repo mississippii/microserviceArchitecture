@@ -10,34 +10,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/config/QuartzConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/ExpiredRecord.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/ExpireRecordRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/springcomponent/DeleteExpiredRecordsJob.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/APIGateWay/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIGateWay/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/APIGateWay/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/config/QuartzConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/ExpiredRecord.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/ExpireRecordRepo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/springcomponent/DeleteExpiredRecordsJob.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/META-INF/MANIFEST.MF" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/application.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/BackendApplication.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/annotations/ApiController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/config/AppConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/controller/StudentsController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/BatchCountDto.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/StudentBatchDto.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/StudentDto.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/dto/UserDto.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/entity/Student.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/repository/StudentRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/classes/backend/service/StudentService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/target/test-classes/backend/BackendApplicationTests.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/DiscoveryServer/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/target/classes/application.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/target/classes/veer/discoveryserver/DiscoveryServer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DiscoveryServer/mvnw.cmd" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +47,8 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Application.BackendApplication.executor": "Run",
     "JUnit.All in Backend.executor": "Debug",
     "Maven.Backend [clean,install].executor": "Run",
     "Maven.Backend [clean].executor": "Run",
@@ -86,16 +70,17 @@
     "git-widget-placeholder": "master",
     "jdk.selected.JAVA_MODULE": "21",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/veer/Documents/Java/MsArchitecture",
+    "last_opened_file_path": "/home/veer/Documents/Java/Scoobydoo/portal",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
+    "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
     "run.configurations.included.in.services": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -165,8 +150,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.153" />
-        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.153" />
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.23654.189" />
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-IU-243.23654.189" />
       </set>
     </attachedChunks>
   </component>
@@ -216,6 +201,10 @@
       <workItem from="1732792083572" duration="12000" />
       <workItem from="1732792148576" duration="24000" />
       <workItem from="1738147922565" duration="7777000" />
+      <workItem from="1738486616554" duration="1419000" />
+      <workItem from="1738524209853" duration="37000" />
+      <workItem from="1738612197017" duration="1100000" />
+      <workItem from="1739123253830" duration="310000" />
     </task>
     <servers />
   </component>

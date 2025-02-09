@@ -23,13 +23,13 @@ public class StudentsController {
 
 
     @PostMapping("/count")
-    public int getStudentCount(){
-        return studentService.getAllStudentCount();
+    public ResponseEntity<Integer> getStudentCount(){
+        return ResponseEntity.ok(studentService.getAllStudentCount());
     }
 
     @PostMapping("/find-by-id")
     public ResponseEntity<StudentDto> getStudent(@RequestBody UserDto userDto) {
-        return studentService.getStudentById(userDto);
+        return ResponseEntity.ok(studentService.getStudentById(userDto)) ;
     }
     @PostMapping("/find-by-name")
     public ResponseEntity<List<StudentDto>> getBatchStudents(@RequestBody UserDto userDto) {

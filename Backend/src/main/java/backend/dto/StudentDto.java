@@ -25,6 +25,7 @@ public class StudentDto {
     private String address;
     private String department;
     private String sex;
+
     public StudentDto(Student student){
         this.studentId = student.getStudentId();
         this.firstName = student.getFirstName();

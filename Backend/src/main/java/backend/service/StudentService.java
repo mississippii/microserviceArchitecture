@@ -26,10 +26,10 @@ public class StudentService {
         this.modelMapper = modelMapper;
     }
 
-    public ResponseEntity<StudentDto> getStudentById(UserDto user) {
+    public StudentDto getStudentById(UserDto user) {
         String studentId = user.getStudentId();
         Student student = studentRepository.findById(studentId).orElseThrow(()-> new IllegalStateException ("Student not found"));
-        return ResponseEntity.ok(modelMapper.map(student, StudentDto.class));
+        return modelMapper.map(student, StudentDto.class);
     }
 
     public List<StudentDto> getStudentByName(UserDto user) {
