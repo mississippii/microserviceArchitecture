@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: Security
+  security:
+    user:
+      name: veer
+      password: 1234
+  datasource:
+    url: jdbc:mysql://localhost:3306/microservices
+    username: veer
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+server:
+  port: 8082

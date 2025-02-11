@@ -10,16 +10,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="872e6792-9193-4c5c-a15d-6a309759151b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/config/SecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/controller/AuthController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/entity/User.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/entity/UserPrincipal.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/repository/UserRepo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security/src/main/java/security/service/CustomUserDetailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/APIGateWay/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/config/QuartzConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/entity/ExpiredRecord.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/ExpireRecordRepo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/springcomponent/DeleteExpiredRecordsJob.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiscoveryServer/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/controller/StudentsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/src/main/java/backend/repository/StudentRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,21 +64,22 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.ApiGateWay.executor": "Run",
-    "Spring Boot.Backend.executor": "Run",
+    "Spring Boot.Backend.executor": "Debug",
     "Spring Boot.BackendApplication.executor": "Run",
     "Spring Boot.DiscoveryServer.executor": "Run",
     "Spring Boot.DiscoveryServerApplication.executor": "Run",
-    "Spring Boot.SecurityApplication.executor": "Run",
+    "Spring Boot.Security.executor": "Debug",
+    "Spring Boot.SecurityApplication.executor": "Debug",
     "git-widget-placeholder": "master",
     "jdk.selected.JAVA_MODULE": "21",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/veer/Documents/Java/Scoobydoo/portal",
+    "last_opened_file_path": "/home/veer/Documents/Java/RTC-Manager",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
+    "project.structure.last.edited": "SDKs",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
     "run.configurations.included.in.services": "true",
@@ -107,7 +110,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.Backend">
+  <component name="RunManager" selected="Spring Boot.Security">
     <configuration name="ApiGateWay" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <module name="APIGateWay" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="veer.apigateway.ApiGateWay" />
@@ -136,7 +139,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Security" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <module name="Security" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="security.SecurityApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <list>
+      <item itemvalue="Spring Boot.Security" />
       <item itemvalue="Spring Boot.ApiGateWay" />
       <item itemvalue="Spring Boot.DiscoveryServer" />
       <item itemvalue="Spring Boot.Backend" />
@@ -205,11 +216,28 @@
       <workItem from="1738524209853" duration="37000" />
       <workItem from="1738612197017" duration="1100000" />
       <workItem from="1739123253830" duration="310000" />
+      <workItem from="1739268818945" duration="9333000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/Security/src/main/java/security/service/CustomUserDetailService.java</url>
+          <line>22</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/Security/src/main/java/security/config/SecurityConfig.java</url>
+          <line>45</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Scoobydoo$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1730045762777" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
