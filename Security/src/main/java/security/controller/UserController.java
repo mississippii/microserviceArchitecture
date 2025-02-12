@@ -1,10 +1,9 @@
 package security.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.annotation.*;
+import security.dto.UserDto;
 import security.entity.User;
 import security.service.UserService;
 
@@ -16,13 +15,25 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("auth/register")
     public ResponseEntity<User> register(@RequestBody User user) {
         return ResponseEntity.ok(userService.register(user));
     }
 
-    @PostMapping("/login")
+    @PostMapping("auth/login")
     public ResponseEntity<String> login(@RequestBody User user) {
-        return ResponseEntity.ok(userService.userVerify(user));
+        try {
+            return ResponseEntity.ok(userService.userVerify(user));
+        } catch (BadCredentialsException e) {
+            throw new RuntimeException("Invalid UserName or Password "+e);
+        }
+    }
+    @PostMapping("auth/profile-activate")
+    public ResponseEntity<String> registerStudent(@RequestBody UserDto student) {
+        return ResponseEntity.ok(userService.profileActivation(student));
+    }
+    @GetMapping("/auth/verify")
+    public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
+        return ResponseEntity.ok(userService.verifyAccount(token));
     }
 }
