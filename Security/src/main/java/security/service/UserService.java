@@ -30,7 +30,7 @@ public class UserService {
     public String userVerify(User user) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword()));
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(user.getUserName());
+            return "Token: "+jwtService.generateToken(user.getUserName());
         }
         return "not authenticated";
     }

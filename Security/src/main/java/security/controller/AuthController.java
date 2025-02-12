@@ -13,9 +13,9 @@ public class AuthController {
         return "Hello World";
     }
 
-    @GetMapping("/get-token")
-    public CsrfToken getAuthentication(HttpServletRequest request) {
-        return (CsrfToken) request.getAttribute("_csrf");
+    @PostMapping("/session-id")
+    public String getSessionId(HttpServletRequest request) {
+        return request.getSession().getId();
     }
 
     @PostMapping("/hola")
