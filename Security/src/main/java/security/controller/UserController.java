@@ -32,7 +32,7 @@ public class UserController {
     public ResponseEntity<String> registerStudent(@RequestBody UserDto student) {
         return ResponseEntity.ok(userService.profileActivation(student));
     }
-    @GetMapping("/auth/verify")
+    @PostMapping("/auth/verify")
     public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
         return ResponseEntity.ok(userService.verifyAccount(token));
     }

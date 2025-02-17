@@ -3,10 +3,11 @@
 **/out/
 
 # Ignore IDE files
-#.idea/
-#*.iml
-#*.ipr
-#*.iws
+.idea/
+*.iml
+*.ipr
+*.iws
+*.xml
 
 # Ignore Maven wrapper files
 .mvn/
