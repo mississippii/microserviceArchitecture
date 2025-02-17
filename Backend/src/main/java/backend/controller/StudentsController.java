@@ -6,15 +6,13 @@ import backend.dto.UserDto;
 import backend.service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
 @RestController()
+@CrossOrigin(value = "*")
 @RequestMapping("/students")
 public class StudentsController {
     private final StudentService studentService;
