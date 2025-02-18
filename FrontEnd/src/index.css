@@ -1,1 +1,5 @@
 @import "tailwindcss";
+body {
+    @apply bg-cover bg-center bg-no-repeat min-h-screen;
+    background-image: url('/public/bg.jpg'); /* Ensure the image is inside the public folder */
+}

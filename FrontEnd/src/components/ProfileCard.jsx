@@ -1,6 +1,6 @@
 import React from 'react';
 import { MdEmail } from 'react-icons/md';
-import { FaPhone, FaGraduationCap, FaUniversity, FaTint, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaPhone, FaGraduationCap, FaUniversity, FaTint, FaMapMarkerAlt, FaFacebook, FaInstagram, FaLinkedin, FaYoutube } from 'react-icons/fa';
 import img1 from '../assets/student.jpeg';
 
 const DetailItem = ({ icon, label, value }) => (
@@ -9,6 +9,14 @@ const DetailItem = ({ icon, label, value }) => (
         <span className="font-bold text-black mr-2">{label}:</span>
         <span className="text-gray-900">{value}</span>
     </div>
+);
+
+const SocialLink = ({ href, icon, label, color }) => (
+    <a href={href || "#"} target="_blank" rel="noopener noreferrer"
+       className={`text-2xl mx-3 transition-all duration-200 ${color} hover:opacity-75`}>
+        {icon}
+        <span className="sr-only">{label}</span>
+    </a>
 );
 
 const ProfileCard = ({ alumniData }) => (
@@ -40,6 +48,14 @@ const ProfileCard = ({ alumniData }) => (
                 <DetailItem label="Organization" value={alumniData?.organizationName} icon={<FaUniversity className="w-4 h-4 mr-2 text-purple-950" />}/>
             </div>
         </div>
+
+        <div className="px-6 py-4 bg-white border-gray-300 flex justify-center">
+            <SocialLink href={alumniData?.facebook} icon={<FaFacebook />} label="Facebook" color="text-blue-600" />
+            <SocialLink href={alumniData?.instagram} icon={<FaInstagram />} label="Instagram" color="text-pink-600" />
+            <SocialLink href={alumniData?.linkedin} icon={<FaLinkedin />} label="LinkedIn" color="text-blue-600" />
+            <SocialLink href={alumniData?.youtube} icon={<FaYoutube />} label="Youtube" color="text-red-600" />
+        </div>
+
     </div>
 );
 

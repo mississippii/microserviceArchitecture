@@ -59,11 +59,11 @@ function Home() {
         fetchTotalConnected();
     }, []);
     return (
-        <div className="bg-white text-gray-900">
+        <div className="bg-transparent text-white">
             <Toaster />
             <section className="py-16">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-12 p-8 bg-gradient-to-r from-blue-400 to-purple-600 rounded-lg shadow-lg">
+                    <div className="text-center mb-12 p-8 bg-gradient-to-r  rounded-lg shadow-lg">
                         <h1 className="text-5xl font-extrabold text-white mb-4">
                             {greeting}...
                         </h1>
@@ -90,7 +90,7 @@ function Home() {
                     {alumniData && <ProfileCard alumniData={alumniData} />}
 
                     <div className="mb-12">
-                        <div className="p-6 bg-white shadow-md rounded-md text-center">
+                        <div className="p-6 bg-transparent rounded-md text-center">
                             <h3 className="text-xl font-semibold">Total Connected</h3>
                             <p className="mt-2 text-3xl text-blue-600">
                                 {total !== null ? total : 'Loading...'}

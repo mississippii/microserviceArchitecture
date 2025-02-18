@@ -18,16 +18,16 @@ function SignIn() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-gray-50 dark:bg-transparent">
+        <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-transparent">
             <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8 dark:bg-transparent">
-                <h1 className="text-2xl font-bold text-center  dark:text-black mb-6">
+                <h1 className="text-2xl font-bold text-center  dark:text-white mb-6">
                     Sign in to your account
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Email Input */}
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium  dark:text-black">
+                        <label htmlFor="email" className="block text-sm font-medium  dark:text-white">
                             Email
                         </label>
                         <input
@@ -37,13 +37,13 @@ function SignIn() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="name@example.com"
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-transparent dark:text-black"
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-transparent dark:text-lime-50"
                         />
                     </div>
 
                     {/* Password Input */}
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium  dark:text-black">
+                        <label htmlFor="password" className="block text-sm font-medium  dark:text-white">
                             Password
                         </label>
                         <input
@@ -53,8 +53,7 @@ function SignIn() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-transparent dark:text-black"
-                        />
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-transparent dark:text-lime-50"/>
                     </div>
 
                     {/* Remember Me & Forgot Password */}
@@ -77,9 +76,9 @@ function SignIn() {
                     </button>
 
                     {/* Sign Up Link */}
-                    <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-center text-sm text-gray-600 dark:text-lime-50">
                         Don’t have an account yet?{" "}
-                        <a href="/signup" className="text-blue-600 hover:underline dark:text-blue-400">
+                        <a href="/signup" className="text-blue-600 hover:underline dark:text-blue-700">
                             Sign up
                         </a>
                     </p>

@@ -13,7 +13,7 @@ function Header() {
     };
 
     return (
-        <header className="bg-white text-black shadow-md">
+        <header className="bg-transparent text-white">
             <div className="max-w-7xl mx-auto px-4 py-5">
                 <div className="flex justify-between items-center">
                     {/* Logo */}
@@ -21,7 +21,7 @@ function Header() {
                         <Link
                             to="/"
                             onClick={handleLinkClick}
-                            className="hover:text-gray-600 transition-colors duration-300"
+                            className="hover:text-white transition-colors duration-300"
                         >
                             NHS Alumni
                         </Link>
@@ -31,7 +31,7 @@ function Header() {
                     <div className="md:hidden">
                         <button
                             onClick={toggleMenu}
-                            className="text-black focus:outline-none"
+                            className="text-white focus:outline-none"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
