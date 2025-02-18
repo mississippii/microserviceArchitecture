@@ -12,5 +12,4 @@ import org.springframework.stereotype.Component;
 public class BatchCountDto {
     private Integer batchYear;
     private Integer count;
-
 }

@@ -18,26 +18,26 @@ const ProfileCard = ({ alumniData }) => (
             <div className="flex flex-col items-center">
                 <img
                     src={img1}
-                    alt={`${alumniData.firstName} ${alumniData.lastName}`}
+                    alt={`${alumniData?.firstName} ${alumniData?.lastName}`}
                     className="w-32 h-32 rounded-full border-2 border-white shadow-md object-cover mb-3"
                 />
                 <h1 className="text-2xl font-semibold text-lime-50 mb-1">
-                    {alumniData.firstName} {alumniData.lastName}
+                    {alumniData?.firstName} {alumniData?.lastName}
                 </h1>
                 <p className="text-white text-base">
-                    {alumniData.occupation}
+                    {alumniData?.occupation}
                 </p>
             </div>
         </div>
         <div className="px-6 py-4">
             <div className="space-y-3 text-gray-800">
-                <DetailItem label="Email" value={alumniData.email} icon={<MdEmail className="w-4 h-4 mr-2 text-purple-950" />} />
-                <DetailItem label="Phone" value={alumniData.phoneNumber} icon={<FaPhone className="w-4 h-4 mr-2 text-purple-950" />} />
-                <DetailItem label="Batch Year" value={alumniData.batchYear} icon={<FaGraduationCap className="w-4 h-4 mr-2 text-purple-950" />} />
-                <DetailItem label="Department" value={alumniData.department} icon={<FaUniversity className="w-4 h-4 mr-2 text-purple-950" />} />
-                <DetailItem label="Blood Group" value={alumniData.bloodGroup} icon={<FaTint className="w-4 h-4 mr-2 text-purple-950" />} />
-                <DetailItem label="Address" value={alumniData.address} icon={<FaMapMarkerAlt className="w-4 h-4 mr-2 text-purple-950" />} />
-                <DetailItem label="Organization" value={alumniData.organizationName} icon={<FaUniversity className="w-4 h-4 mr-2 text-purple-950" />}/>
+                <DetailItem label="Email" value={alumniData?.email} icon={<MdEmail className="w-4 h-4 mr-2 text-purple-950" />} />
+                <DetailItem label="Phone" value={alumniData?.phoneNumber} icon={<FaPhone className="w-4 h-4 mr-2 text-purple-950" />} />
+                <DetailItem label="Batch Year" value={alumniData?.batchYear} icon={<FaGraduationCap className="w-4 h-4 mr-2 text-purple-950" />} />
+                <DetailItem label="Department" value={alumniData?.department} icon={<FaUniversity className="w-4 h-4 mr-2 text-purple-950" />} />
+                <DetailItem label="Blood Group" value={alumniData?.bloodGroup} icon={<FaTint className="w-4 h-4 mr-2 text-purple-950" />} />
+                <DetailItem label="Address" value={alumniData?.address} icon={<FaMapMarkerAlt className="w-4 h-4 mr-2 text-purple-950" />} />
+                <DetailItem label="Organization" value={alumniData?.organizationName} icon={<FaUniversity className="w-4 h-4 mr-2 text-purple-950" />}/>
             </div>
         </div>
     </div>

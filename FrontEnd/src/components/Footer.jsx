@@ -1,4 +1,4 @@
-import React from "react";
+import "react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa"; // Using React Icons
 
 function Footer() {
@@ -8,7 +8,7 @@ function Footer() {
                 {/* Main footer content */}
                 <div className="flex flex-col md:flex-row justify-between items-center">
                     <div className="text-4xl font-semibold mb-8 md:mb-0 text-center md:text-left">
-                        School Alumni
+                        NHS Alumni
                     </div>
                     <div className="flex flex-col md:flex-row items-center md:space-x-10 space-y-4 md:space-y-0 text-center md:text-left">
                         <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors duration-300">About Us</a>
