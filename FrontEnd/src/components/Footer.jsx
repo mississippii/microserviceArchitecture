@@ -11,30 +11,30 @@ function Footer() {
                         NHS Alumni
                     </div>
                     <div className="flex flex-col md:flex-row items-center md:space-x-10 space-y-4 md:space-y-0 text-center md:text-left">
-                        <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors duration-300">About Us</a>
-                        <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors duration-300">Contact</a>
-                        <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors duration-300">Privacy Policy</a>
+                        <a href="#" className="text-lime-50 hover:text-blue-500 transition-colors duration-300">About Us</a>
+                        <a href="#" className="text-lime-50 hover:text-blue-500 transition-colors duration-300">Contact</a>
+                        <a href="#" className="text-lime-50 hover:text-blue-500 transition-colors duration-300">Privacy Policy</a>
                     </div>
                 </div>
 
                 {/* Social Media Links */}
                 <div className="flex justify-center space-x-8 mt-8">
-                    <a href="#" className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
+                    <a href="#" className="text-lime-50 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
                         <FaFacebook className="text-3xl" />
                     </a>
-                    <a href="#" className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
+                    <a href="#" className="text-lime-50 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
                         <FaTwitter className="text-3xl" />
                     </a>
-                    <a href="#" className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
+                    <a href="#" className="text-lime-50 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
                         <FaLinkedin className="text-3xl" />
                     </a>
-                    <a href="#" className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
+                    <a href="#" className="text-lime-50 hover:text-blue-500 transition-all duration-300 transform hover:scale-110">
                         <FaInstagram className="text-3xl" />
                     </a>
                 </div>
 
                 {/* Footer Bottom */}
-                <div className="text-center text-sm text-gray-500 mt-12">
+                <div className="text-center text-sm text-white mt-12">
                     <p>&copy; 2025 School Alumni. All rights reserved.</p>
                 </div>
             </div>

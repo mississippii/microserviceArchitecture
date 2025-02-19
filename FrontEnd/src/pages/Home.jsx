@@ -63,7 +63,7 @@ function Home() {
             <Toaster />
             <section className="py-16">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-12 p-8 bg-gradient-to-r  rounded-lg shadow-lg">
+                    <div className="text-center mb-12 p-8 bg-gradient-to-r  rounded-lg ">
                         <h1 className="text-5xl font-extrabold text-white mb-4">
                             {greeting}...
                         </h1>
