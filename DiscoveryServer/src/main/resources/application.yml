@@ -1,20 +1,27 @@
 spring:
   application:
     name: DiscoveryServer
+  profiles:
+    active: development
   cloud:
     eureka:
-      client:
-        register-with-eureka: false
-        fetch-registry: false
-        service-url:
+      server:
+        enable-self-preservation: false
+        eviction-interval-timer-in-ms: 5000
+
 server:
   port: 8761
 
 eureka:
   instance:
-    prefer-ip-address: true
     hostname: localhost
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
   client:
+    register-with-eureka: false
     fetch-registry: false
-    refresh:
-      enable: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+    response-cache-update-interval-ms: 5000

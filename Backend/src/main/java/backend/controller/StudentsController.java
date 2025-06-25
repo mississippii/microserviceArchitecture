@@ -21,7 +21,10 @@ public class StudentsController {
         this.studentService = studentService;
     }
 
-
+    @PostMapping("/string")
+    public ResponseEntity<String> getString(){
+        return ResponseEntity.ok("Hello World");
+    }
     @PostMapping("/count")
     public ResponseEntity<Integer> getStudentCount(){
         return ResponseEntity.ok(studentService.getAllStudentCount());
