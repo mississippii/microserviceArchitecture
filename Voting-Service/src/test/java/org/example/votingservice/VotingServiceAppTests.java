@@ -1,10 +1,10 @@
-package security;
+package org.example.votingservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SecurityApplicationTests {
+class VotingServiceAppTests {
 
     @Test
     void contextLoads() {
