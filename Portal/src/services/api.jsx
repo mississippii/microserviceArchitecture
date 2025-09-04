@@ -1,38 +1,30 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = "http://localhost:8090/api/auth";
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
-
-// Add token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+export const fetchStudent = async (studentId) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/student/${studentId}`);
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "Student not found");
   }
-  return config;
-});
-
-export const initiateVoting = (studentId) => {
-  return api.post('/auth/initiate', { studentId });
 };
 
-export const verifyToken = (token) => {
-  return api.get(`/auth/verify-token/${token}`);
+export const fetchCandidates = async () => {
+  try {
+    const res = await axios.post(`${BASE_URL}/candidate/findAll`);
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "Failed to fetch candidates");
+  }
 };
 
-export const getCandidates = () => {
-  return api.get('/candidates');
+export const submitVote = async (studentId, votes) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/votes`, { studentId, votes });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "Voting failed");
+  }
 };
-
-export const submitVote = (voteData) => {
-  return api.post('/votes', voteData);
-};
-
-export const getResults = () => {
-  return api.get('/results');
-};
-
-export default api;

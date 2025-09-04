@@ -1,48 +1,39 @@
-import { useState } from 'react';
-import { initiateVoting } from '../services/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { fetchStudent } from "../services/api.jsx";
 
-const Login = () => {
-  const [studentId, setStudentId] = useState('');
-  const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export default function LoginPage() {
+  const [studentId, setStudentId] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setMessage('');
-    
+  const handleLogin = async () => {
     try {
-      const response = await initiateVoting(studentId);
-      setMessage('Voting link has been sent to your email. Please check your inbox.');
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'An error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+      const student = await fetchStudent(studentId);
+      localStorage.setItem("student", JSON.stringify(student));
+      navigate("/vote");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>University Election System</h2>
-      <form onSubmit={handleSubmit} className="login-form">
-        <div className="form-group">
-          <label htmlFor="studentId">Student ID:</label>
-          <input
-            type="text"
-            id="studentId"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            required
-            placeholder="Enter your student ID"
-          />
-        </div>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Processing...' : 'Request Voting Link'}
-        </button>
-      </form>
-      {message && <p className="message">{message}</p>}
+    <div className="flex flex-col items-center mt-20">
+      <h1 className="text-2xl font-bold mb-4">Online Voting System</h1>
+      <input
+        type="text"
+        placeholder="Enter Student ID"
+        value={studentId}
+        onChange={(e) => setStudentId(e.target.value)}
+        className="border p-2 rounded w-64 mb-4"
+      />
+      <button
+        onClick={handleLogin}
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Login
+      </button>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
-};
-
-export default Login;
+}

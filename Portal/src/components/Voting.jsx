@@ -1,97 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { getCandidates, submitVote } from '../services/api';
+import { useEffect, useState } from "react";
+import { fetchCandidates, submitVote } from "../services/api";
 
-const Voting = () => {
-  const [candidates, setCandidates] = useState([]);
-  const [selectedCandidates, setSelectedCandidates] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+export default function VotePage() {
+  const [candidates, setCandidates] = useState({});
+  const [votes, setVotes] = useState({});
+  const student = JSON.parse(localStorage.getItem("student"));
 
   useEffect(() => {
-    const fetchCandidates = async () => {
-      try {
-        const response = await getCandidates();
-        setCandidates(response.data);
-      } catch (error) {
-        setMessage('Failed to load candidates. Please try again.');
-      }
-    };
-
-    fetchCandidates();
+    fetchCandidates().then(data => {
+      const grouped = data.reduce((acc, c) => {
+        acc[c.position] = acc[c.position] || [];
+        acc[c.position].push(c);
+        return acc;
+      }, {});
+      setCandidates(grouped);
+    });
   }, []);
 
-  const handleVoteChange = (position, candidateId) => {
-    setSelectedCandidates({
-      ...selectedCandidates,
-      [position]: candidateId
-    });
+  const handleVote = (position, candidateId) => {
+    setVotes({ ...votes, [position]: candidateId });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setMessage('');
-
+  const handleSubmit = async () => {
     try {
-      const votes = Object.keys(selectedCandidates).map(position => ({
-        position,
-        candidateId: selectedCandidates[position]
-      }));
-
-      await submitVote({ votes });
-      setMessage('Your vote has been submitted successfully!');
-      setSelectedCandidates({});
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'Failed to submit vote. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      await submitVote(student.id, votes);
+      alert("Vote submitted successfully!");
+      localStorage.removeItem("student");
+      // optionally redirect to results page
+    } catch (err) {
+      alert(err.response?.data?.message || "Voting failed");
     }
   };
-
-  // Group candidates by position
-  const candidatesByPosition = candidates.reduce((acc, candidate) => {
-    if (!acc[candidate.position]) {
-      acc[candidate.position] = [];
-    }
-    acc[candidate.position].push(candidate);
-    return acc;
-  }, {});
 
   return (
-    <div className="voting-container">
-      <h2>Cast Your Vote</h2>
-      <form onSubmit={handleSubmit} className="voting-form">
-        {Object.keys(candidatesByPosition).map(position => (
-          <div key={position} className="position-group">
-            <h3>{position}</h3>
-            <div className="candidates-list">
-              {candidatesByPosition[position].map(candidate => (
-                <div key={candidate.id} className="candidate-item">
-                  <input
-                    type="radio"
-                    id={`${position}-${candidate.id}`}
-                    name={position}
-                    value={candidate.id}
-                    checked={selectedCandidates[position] === candidate.id}
-                    onChange={() => handleVoteChange(position, candidate.id)}
-                    required
-                  />
-                  <label htmlFor={`${position}-${candidate.id}`}>
-                    {candidate.name} ({candidate.department})
-                  </label>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Welcome, {student.name}</h1>
+
+      {Object.keys(candidates).map(position => (
+        <div key={position} className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">{position}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {candidates[position].map(c => {
+              const isSelected = votes[position] === c.id;
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => handleVote(position, c.id)}
+                  className={`border rounded-lg p-4 cursor-pointer transform transition-all duration-200
+                    ${isSelected ? 'bg-blue-100 border-blue-500 scale-105' : 'hover:shadow-lg'}`}
+                >
+                  {c.symbol && (
+                    <div className="text-2xl mb-2 text-center">{c.symbol}</div>
+                  )}
+                  {c.photoUrl && (
+                    <img
+                      src={c.photoUrl}
+                      alt={c.name}
+                      className="w-full h-40 object-cover rounded-md mb-3"
+                    />
+                  )}
+                  <h3 className="text-lg font-bold">{c.name}</h3>
+                  <p className="text-gray-600">{c.slogan}</p>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        ))}
-        
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Submitting...' : 'Submit Vote'}
-        </button>
-      </form>
-      {message && <p className="message">{message}</p>}
+        </div>
+      ))}
+
+      <button
+        onClick={handleSubmit}
+        className="bg-green-500 text-white px-6 py-3 rounded-md mt-4 hover:bg-green-600 transition-colors"
+      >
+        Submit Vote
+      </button>
     </div>
   );
-};
-
-export default Voting;
+}
