@@ -2,7 +2,7 @@ spring:
   application:
     name: DiscoveryServer
   profiles:
-    active: development
+    active: dev
   cloud:
     eureka:
       server:

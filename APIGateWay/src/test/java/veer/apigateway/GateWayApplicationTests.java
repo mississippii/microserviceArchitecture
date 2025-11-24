@@ -1,10 +1,10 @@
-package veer.discoveryserver;
+package veer.apigateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DiscoveryServerApplicationTests {
+class GateWayApplicationTests {
 
 	@Test
 	void contextLoads() {
