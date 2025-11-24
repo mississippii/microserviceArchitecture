@@ -1,19 +1,37 @@
 package security.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.time.Instant;
 
 @Entity
-@Data
+@Table(name = "users")
+@Getter
+@Setter
+@ToString(exclude = "password")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, length = 70)
     private String userName;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false, unique = true)
     private String email;
-    private boolean isActive=false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.CUSTOMER;
+
+    private boolean active = true;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
 }

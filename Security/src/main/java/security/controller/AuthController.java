@@ -1,25 +1,36 @@
 package security.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.web.csrf.CsrfToken;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import security.dto.AuthenticationRequest;
+import security.dto.AuthenticationResponse;
+import security.dto.RegisterRequest;
+import security.dto.UserProfileResponse;
+import security.service.UserService;
 
 @RestController
-@CrossOrigin(value = "*")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    @GetMapping("/")
-    public String index() {
-        return "Hello World";
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping("/session-id")
-    public String getSessionId(HttpServletRequest request) {
-        return request.getSession().getId();
+    @PostMapping("/register")
+    public ResponseEntity<UserProfileResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(userService.register(request));
     }
 
-    @PostMapping("/hola")
-    public String postAuthentication(HttpServletRequest request) {
-        return "Hello World \n"+request.getSession().getId();
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(userService.authenticate(request));
+    }
+
+    @GetMapping("/heartbeat")
+    public ResponseEntity<String> heartbeat() {
+        return ResponseEntity.ok("auth-service-up");
     }
 }

@@ -1,13 +1,17 @@
 package security.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
-import security.dto.UserDto;
-import security.entity.User;
+import security.dto.PurchaseRequest;
+import security.dto.UserProfileResponse;
 import security.service.UserService;
 
+import java.util.List;
+
 @RestController
+@RequestMapping("/api")
+@CrossOrigin("*")
 public class UserController {
     private final UserService userService;
 
@@ -15,25 +19,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("auth/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
-        return ResponseEntity.ok(userService.register(user));
+    @GetMapping("/users/me")
+    public ResponseEntity<UserProfileResponse> me() {
+        return ResponseEntity.ok(userService.currentUserProfile());
     }
 
-    @PostMapping("auth/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        try {
-            return ResponseEntity.ok(userService.userVerify(user));
-        } catch (BadCredentialsException e) {
-            throw new RuntimeException("Invalid UserName or Password "+e);
-        }
+    @PostMapping("/users/purchase")
+    public ResponseEntity<String> purchase(@Valid @RequestBody PurchaseRequest request) {
+        return ResponseEntity.ok(userService.purchaseProduct(request));
     }
-    @PostMapping("auth/profile-activate")
-    public ResponseEntity<String> registerStudent(@RequestBody UserDto student) {
-        return ResponseEntity.ok(userService.profileActivation(student));
-    }
-    @PostMapping("/auth/verify")
-    public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
-        return ResponseEntity.ok(userService.verifyAccount(token));
+
+    @GetMapping("/admin/users")
+    public ResponseEntity<List<UserProfileResponse>> allUsers() {
+        return ResponseEntity.ok(userService.findAllUsers());
     }
 }

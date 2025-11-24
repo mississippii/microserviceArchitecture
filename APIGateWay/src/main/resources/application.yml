@@ -1,25 +1,25 @@
 spring:
   application:
-    name: APIGateWay
+    name: APIGATEWAY
+  main:
+    web-application-type: reactive
   cloud:
     gateway:
+      metrics:
+        enabled: true
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 5s
       discovery:
         locator:
-          enabled: true
-          filters:
-            - StripPrefix=1
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter:
-                  replenishRate: 10000
-                  burstCapacity: 20000
-                  requestedTokens: 1
-
+          enabled: false
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: 1234
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
 
 server:
@@ -28,9 +28,18 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway,health,info
+  endpoint:
+    gateway:
+      enabled: true
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.context: DEBUG
+    org.springframework.cloud.gateway: INFO
+    veer.apigateway: DEBUG
