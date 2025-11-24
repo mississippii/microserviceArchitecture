@@ -4,6 +4,7 @@ import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
@@ -13,6 +14,7 @@ import java.net.InetSocketAddress;
 public class RateLimiterConfig {
 
     @Bean
+    @Primary
     public KeyResolver ipKeyResolver() {
         return exchange -> Mono.defer(() -> {
             String forwardedFor = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
