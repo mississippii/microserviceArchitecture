@@ -22,17 +22,19 @@ public class GatewayRoutesConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
+                // SECURITY service
                 .route("SECURITY", r -> r
-                        .path("/security/**")
+                        .path("/SECURITY/**")  // Uppercase path
                         .filters(f -> f
                                 .stripPrefix(1)
                                 .requestRateLimiter(config -> config
                                         .setKeyResolver(keyResolver)
                                         .setRateLimiter(redisRateLimiter)
                                         .setStatusCode(HttpStatus.TOO_MANY_REQUESTS)))
-                        .uri("lb://SECURITY"))
+                        .uri("lb://SECURITY")) // Service name must match discovery
+                // BACKEND service
                 .route("BACKEND", r -> r
-                        .path("/backend/**")
+                        .path("/BACKEND/**")  // Uppercase path
                         .filters(f -> f
                                 .stripPrefix(1)
                                 .requestRateLimiter(config -> config
@@ -40,17 +42,10 @@ public class GatewayRoutesConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setStatusCode(HttpStatus.TOO_MANY_REQUESTS)))
                         .uri("lb://BACKEND"))
-                .route("BACKEND-UPPER", r -> r
-                        .path("/BACKEND/**")
-                        .filters(f -> f
-                                .stripPrefix(1)
-                                .requestRateLimiter(config -> config
-                                        .setKeyResolver(keyResolver)
-                                        .setRateLimiter(redisRateLimiter)
-                                        .setStatusCode(HttpStatus.TOO_MANY_REQUESTS)))
-                        .uri("lb://BACKEND"))
+
+                // VOTING-SERVICE
                 .route("VOTING-SERVICE", r -> r
-                        .path("/voting/**")
+                        .path("/VOTING-SERVICE/**")  // Uppercase path
                         .filters(f -> f.stripPrefix(1))
                         .uri("lb://VOTING-SERVICE"))
                 .build();

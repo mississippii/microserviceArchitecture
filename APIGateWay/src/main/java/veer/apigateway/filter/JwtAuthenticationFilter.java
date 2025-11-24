@@ -25,8 +25,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private static final List<String> OPEN_PATHS = List.of(
-            "/security/api/auth/register",
-            "/security/api/auth/login"
+            "/SECURITY/api/auth/register",
+            "/SECURITY/api/auth/login"
     );
 
     private static final String DEFAULT_SECRET = "635266556A576E5A7234753778214125442A472D4B6150645367566B59703273";
@@ -97,7 +97,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Run before the logging filter but after CORS
         return -1;
     }
 }

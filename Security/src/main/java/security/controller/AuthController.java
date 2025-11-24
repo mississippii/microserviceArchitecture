@@ -19,6 +19,11 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @PostMapping("/string")
+    public String getString(){
+        return "Hello World";
+    }
+
     @PostMapping("/register")
     public ResponseEntity<UserProfileResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(userService.register(request));
@@ -29,7 +34,7 @@ public class AuthController {
         return ResponseEntity.ok(userService.authenticate(request));
     }
 
-    @GetMapping("/heartbeat")
+    @PostMapping("/heartbeat")
     public ResponseEntity<String> heartbeat() {
         return ResponseEntity.ok("auth-service-up");
     }
