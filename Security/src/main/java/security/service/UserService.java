@@ -20,6 +20,7 @@ import security.entity.Role;
 import security.entity.User;
 import security.repository.UserRepo;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,15 +31,18 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public UserService(UserRepo userRepo,
                        AuthenticationManager authenticationManager,
                        PasswordEncoder passwordEncoder,
-                       JWTService jwtService) {
+                       JWTService jwtService,
+                       TokenBlacklistService tokenBlacklistService) {
         this.userRepo = userRepo;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Transactional
@@ -90,6 +94,17 @@ public class UserService {
         UserProfileResponse profile = currentUserProfile();
         return String.format("User %s ordered %d unit(s) of product %s",
                 profile.getUsername(), request.getQuantity(), request.getProductId());
+    }
+
+    public void logout(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        String token = authHeader.substring(7);
+        String jti = jwtService.extractJti(token);
+        Instant expiry = jwtService.extractExpiration(token).toInstant();
+        tokenBlacklistService.blacklist(jti, expiry);
+        SecurityContextHolder.clearContext();
     }
 
     public List<UserProfileResponse> findAllUsers() {

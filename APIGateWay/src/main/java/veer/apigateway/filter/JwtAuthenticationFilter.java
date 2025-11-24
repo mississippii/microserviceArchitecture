@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import veer.apigateway.service.TokenBlacklistService;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -31,10 +32,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final String DEFAULT_SECRET = "635266556A576E5A7234753778214125442A472D4B6150645367566B59703273";
 
     private final SecretKey signingKey;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtAuthenticationFilter(@Value("${security.jwt.secret:}") String secret) {
+    public JwtAuthenticationFilter(@Value("${security.jwt.secret:}") String secret,
+                                   TokenBlacklistService tokenBlacklistService) {
         String effectiveSecret = (secret != null && !secret.isBlank()) ? secret : DEFAULT_SECRET;
         this.signingKey = resolveKey(effectiveSecret);
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     private SecretKey resolveKey(String secret) {
@@ -62,16 +66,19 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = authHeader.substring(7);
         try {
-            Jwts.parserBuilder()
+            var claims = Jwts.parserBuilder()
                     .setSigningKey(signingKey)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String jti = claims.getId();
+            return tokenBlacklistService.isBlacklisted(jti)
+                    .flatMap(blacklisted -> blacklisted ? unauthorized(exchange, "Token revoked") : chain.filter(exchange));
         } catch (Exception ex) {
             log.debug("JWT validation failed for path {}: {}", path, ex.getMessage());
             return unauthorized(exchange, "Invalid or expired token");
         }
-
-        return chain.filter(exchange);
     }
 
     private boolean isOpenPath(String path) {

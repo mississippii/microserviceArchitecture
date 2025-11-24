@@ -33,4 +33,10 @@ public class AuthController {
     public ResponseEntity<String> heartbeat() {
         return ResponseEntity.ok("auth-service-up");
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        userService.logout(authHeader);
+        return ResponseEntity.noContent().build();
+    }
 }

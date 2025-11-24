@@ -44,38 +44,43 @@ import java.util.function.Function;
             }
         }
 
-    public String generateToken(UserDetails userDetails) {
-        String role = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst()
-                .orElse("ROLE_CUSTOMER");
-        Map<String, Object> claims = Map.of("role", role);
-        return buildToken(claims, userDetails.getUsername());
-    }
+        public String generateToken(UserDetails userDetails) {
+            String role = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse("ROLE_CUSTOMER");
+            Map<String, Object> claims = Map.of("role", role);
+            return buildToken(claims, userDetails.getUsername());
+        }
 
     public Instant tokenExpiryInstant() {
         return Instant.now().plusMillis(expirationMillis);
     }
 
-    public String extractUserName(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
+        public String extractUserName(String token) {
+            return extractClaim(token, Claims::getSubject);
+        }
+
+        public String extractJti(String token) {
+            return extractClaim(token, Claims::getId);
+        }
 
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = extractUserName(token);
         return username.equalsIgnoreCase(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    private String buildToken(Map<String, Object> claims, String subject) {
-        Instant now = Instant.now();
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plusMillis(expirationMillis)))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-    }
+        private String buildToken(Map<String, Object> claims, String subject) {
+            Instant now = Instant.now();
+            return Jwts.builder()
+                    .setClaims(claims)
+                    .setSubject(subject)
+                    .setId(java.util.UUID.randomUUID().toString())
+                    .setIssuedAt(Date.from(now))
+                    .setExpiration(Date.from(now.plusMillis(expirationMillis)))
+                    .signWith(secretKey, SignatureAlgorithm.HS256)
+                    .compact();
+        }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
         return resolver.apply(extractAllClaims(token));
@@ -93,7 +98,7 @@ import java.util.function.Function;
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 }
