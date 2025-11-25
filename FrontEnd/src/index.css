@@ -1,5 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+:root {
+    --alumni-bg: radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.06), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.04), transparent 30%),
+    linear-gradient(160deg, #04060b 0%, #05070d 45%, #020308 100%);
+    --alumni-card: rgba(255, 255, 255, 0.04);
+    --alumni-border: rgba(255, 255, 255, 0.12);
+    --alumni-glow: 0 22px 60px rgba(0, 0, 0, 0.35);
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    @apply bg-fixed bg-cover bg-center bg-no-repeat min-h-screen;
-    background-image: url('/public/bg.jpg'); /* Ensure the image is inside the public folder */
+    margin: 0;
+    font-family: 'DM Sans', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    background-image: var(--alumni-bg), url('/public/bg.jpg');
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    color: #e8edf7;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+.page-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.heading-strong {
+    font-family: 'Space Grotesk', 'DM Sans', system-ui, -apple-system, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+}
+
+.glass-panel {
+    background: var(--alumni-card);
+    border: 1px solid var(--alumni-border);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--alumni-glow);
+}
+
+.muted {
+    color: rgba(232, 237, 247, 0.7);
 }

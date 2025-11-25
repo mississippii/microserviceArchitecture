@@ -13,21 +13,27 @@ function Header() {
     };
 
     return (
-        <header className="bg-transparent text-white">
-            <div className="max-w-7xl mx-auto px-4 py-5">
-                <div className="flex justify-between items-center">
-                    {/* Logo */}
-                    <div className="text-2xl font-semibold">
-                        <Link
-                            to="/"
+        <header className="sticky top-0 z-40 backdrop-blur border-b border-white/10 bg-[#0c1327]/80">
+            <div className="page-shell py-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <span className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center text-lg font-bold text-[#0c1327] shadow-lg shadow-amber-500/30">
+                            A
+                        </span>
+                        <div>
+                            <Link
+                                to="/"
                             onClick={handleLinkClick}
-                            className="hover:text-white transition-colors duration-300"
+                            className="text-xl font-semibold tracking-tight text-white hover:text-cyan-300"
                         >
-                            NHS Alumni
+                            NHS ALUMNI
                         </Link>
+                            <p className="text-xs uppercase tracking-[0.2em] text-white/60">
+                                Reconnect &amp; celebrate
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Mobile Menu Button */}
                     <div className="md:hidden">
                         <button
                             onClick={toggleMenu}
@@ -50,48 +56,25 @@ function Header() {
                         </button>
                     </div>
 
-                    {/* Desktop Navigation */}
-                    <nav className="hidden md:flex md:items-center md:space-x-8">
+                    <nav className="hidden md:flex md:items-center md:space-x-2">
                         <Link
                             to="/"
                             onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
+                            className="px-3 py-2 rounded-full text-sm text-white/80 hover:text-white hover:bg-white/10 transition"
                         >
                             Home
                         </Link>
                         <Link
                             to="/alumni"
                             onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
+                            className="px-3 py-2 rounded-full text-sm text-white/80 hover:text-white hover:bg-white/10 transition"
                         >
-                            Alumni
+                            Directory
                         </Link>
-                        <Link
-                            to="/about"
-                            onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
-                        >
-                            About
-                        </Link>
-                        <Link
-                            to="/events"
-                            onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
-                        >
-                            Events
-                        </Link>
-                        <Link
-                            to="/contact"
-                            onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
-                        >
-                            Contact
-                        </Link>
-                        {/* Single Signin Button */}
                         <Link
                             to="/signin"
                             onClick={handleLinkClick}
-                            className="ml-4 px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition"
+                            className="ml-4 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 text-[#0b1224] shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition"
                         >
                             Sign in
                         </Link>
@@ -99,49 +82,27 @@ function Header() {
                 </div>
             </div>
 
-            {/* Mobile Navigation Menu */}
             {isMenuOpen && (
-                <div className="md:hidden bg-white shadow-md">
+                <div className="md:hidden bg-[#0f172a] border-t border-white/10">
                     <nav className="flex flex-col space-y-2 p-4">
                         <Link
                             to="/"
                             onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
+                            className="px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition"
                         >
                             Home
                         </Link>
                         <Link
                             to="/alumni"
                             onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
+                            className="px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition"
                         >
-                            Alumni
-                        </Link>
-                        <Link
-                            to="/about"
-                            onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
-                        >
-                            About
-                        </Link>
-                        <Link
-                            to="/events"
-                            onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
-                        >
-                            Events
-                        </Link>
-                        <Link
-                            to="/contact"
-                            onClick={handleLinkClick}
-                            className="hover:text-green-500 transition-colors duration-300"
-                        >
-                            Contact
+                            Directory
                         </Link>
                         <Link
                             to="/signin"
                             onClick={handleLinkClick}
-                            className="mt-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-md text-center hover:bg-blue-600 hover:text-white transition"
+                            className="px-3 py-2 rounded-md text-center bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 text-[#0b1224] font-semibold shadow-lg shadow-amber-500/30 hover:shadow-xl transition"
                         >
                             Sign in
                         </Link>

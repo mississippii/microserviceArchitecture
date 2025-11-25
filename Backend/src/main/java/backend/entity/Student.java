@@ -25,8 +25,8 @@ public class Student {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "profile_pic", columnDefinition = "TEXT")
+    private String profilePic;
 
     @Column(name = "batch_year", nullable = false)
     private int batchYear;
@@ -57,6 +57,18 @@ public class Student {
 
     @Column(name = "sex")
     private String sex;
+
+    @Column(name = "facebook")
+    private String facebook;
+
+    @Column(name = "instagram")
+    private String instagram;
+
+    @Column(name = "linkedin")
+    private String linkedin;
+
+    @Column(name = "youtube")
+    private String youtube;
 
     @PrePersist
     protected void onCreate() {

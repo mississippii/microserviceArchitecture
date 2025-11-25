@@ -2,22 +2,27 @@ package backend.controller;
 
 import backend.dto.BatchCountDto;
 import backend.dto.StudentDto;
+import backend.dto.StudentEditableRequest;
 import backend.dto.UserDto;
+import backend.service.FileStorageService;
 import backend.service.StudentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 
 @RestController()
-@RequestMapping("/students")
+@RequestMapping("/api/guest/students")
 public class StudentsController {
     private final StudentService studentService;
+    private final FileStorageService fileStorageService;
 
-    public StudentsController(StudentService studentService) {
+    public StudentsController(StudentService studentService, FileStorageService fileStorageService) {
         this.studentService = studentService;
+        this.fileStorageService = fileStorageService;
     }
 
     @PostMapping("/string")
@@ -76,6 +81,25 @@ public class StudentsController {
             return ResponseEntity.ok(batchCount);
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @PostMapping("/update-profile")
+    public ResponseEntity<StudentDto> saveEditable(@RequestBody StudentEditableRequest request) {
+        StudentDto saved = studentService.saveEditable(request);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/upload-photo")
+    public ResponseEntity<String> uploadPhoto(@RequestParam("file") MultipartFile file,
+                                              @RequestParam(value = "studentId", required = false) String studentId) {
+        try {
+            String url = fileStorageService.store(file, studentId);
+            return ResponseEntity.ok(url);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed");
         }
     }
 

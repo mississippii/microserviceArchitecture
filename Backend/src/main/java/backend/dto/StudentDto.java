@@ -14,7 +14,7 @@ public class StudentDto {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String imageUrl;
+    private String profilePic;
     private int batchYear;
     private String occupation;
     private String organizationName;
@@ -25,6 +25,10 @@ public class StudentDto {
     private String address;
     private String department;
     private String sex;
+    private String facebook;
+    private String instagram;
+    private String linkedin;
+    private String youtube;
 
     public StudentDto(Student student){
         this.studentId = student.getStudentId();
@@ -32,6 +36,7 @@ public class StudentDto {
         this.lastName = student.getLastName();
         this.email = student.getEmail();
         this.phoneNumber = student.getPhoneNumber();
+        this.profilePic = student.getProfilePic();
         this.batchYear = student.getBatchYear();
         this.occupation = student.getOccupation();
         this.organizationName = student.getOrganizationName();
@@ -39,5 +44,9 @@ public class StudentDto {
         this.address = student.getAddress();
         this.department = student.getDepartment();
         this.sex = student.getSex();
+        this.facebook = student.getFacebook();
+        this.instagram = student.getInstagram();
+        this.linkedin = student.getLinkedin();
+        this.youtube = student.getYoutube();
     }
 }
