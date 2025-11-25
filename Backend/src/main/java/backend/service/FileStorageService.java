@@ -15,7 +15,7 @@ import java.util.UUID;
 public class FileStorageService {
 
     private final Path uploadDir = Paths.get("/home/veer/Documents/Java/Scoobydoo/Backend/uploads");
-    private final String baseUrl = "http://192.168.0.134:8001/BACKEND/uploads/";
+    private final String baseUrl = "http://192.168.0.177:8001/BACKEND/uploads/";
 
     public FileStorageService() throws IOException {
         if (!Files.exists(uploadDir)) {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProfileCard from './ProfileCard';
 import img1 from '../assets/student.jpeg';
-import { IMAGE_BASE } from "../apiConfig.js";
+import { IMAGE_BASE, OLD_IMAGE_HOST, NEW_IMAGE_HOST } from "../apiConfig.js";
 
 const CompactProfileCard = ({ alumniData }) => {
     const [showPopup, setShowPopup] = useState(false);
@@ -21,7 +21,7 @@ const CompactProfileCard = ({ alumniData }) => {
                     {alumniData?.profilePic && String(alumniData.profilePic).trim().length > 0 ? (
                         <img
                             src={alumniData.profilePic.startsWith('http')
-                                ? alumniData.profilePic.replace('192.168.0.134:8001', '192.168.0.134:8081')
+                                ? alumniData.profilePic.replace(OLD_IMAGE_HOST, NEW_IMAGE_HOST)
                                 : `${IMAGE_BASE}${alumniData.profilePic}`}
                             alt={`${alumniData?.firstName || ''} ${alumniData?.lastName || ''}`}
                             className="w-16 h-16 rounded-full object-cover border border-white/20 shadow-lg shadow-black/30"

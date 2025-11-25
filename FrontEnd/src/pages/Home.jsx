@@ -15,6 +15,8 @@ function Home() {
     const [total, setTotal] = useState(null);
     const [batches, setBatches] = useState([]);
     const [batchesLoading, setBatchesLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
 
     const getGreetingMessage = () => {
         const currentHour = new Date().getHours();
@@ -158,37 +160,58 @@ function Home() {
                         <h3 className="heading-strong text-lg text-white">Browse by batch</h3>
                         <p className="text-white/70">Jump into a class and see everyone from that year.</p>
                     </div>
-                    <Link
-                        to="/alumni"
-                        className="px-4 py-2 rounded-full border border-white/20 text-sm text-white/80 hover:text-white hover:border-white/40 transition"
-                    >
-                        View full directory
-                    </Link>
                 </div>
 
                 {batchesLoading ? (
                     <div className="text-white/70">Loading batches…</div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {batches.slice(0, 8).map(batch => (
-                            <Link
-                                to={`/batch/${batch.batchYear}`}
-                                key={batch.batchYear}
-                                className="glass-panel rounded-xl p-4 border border-white/10 hover:-translate-y-1 transition flex flex-col gap-2"
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {(() => {
+                                const totalPages = batches.length ? Math.ceil(batches.length / itemsPerPage) : 1;
+                                const start = (currentPage - 1) * itemsPerPage;
+                                const end = currentPage * itemsPerPage;
+                                const paginated = batches.slice(start, end);
+                                return paginated.map(batch => (
+                                    <Link
+                                        to={`/batch/${batch.batchYear}`}
+                                        key={batch.batchYear}
+                                        className="glass-panel rounded-xl p-4 border border-white/10 hover:-translate-y-1 transition flex flex-col gap-2"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
+                                                <FaCalendarAlt />
+                                            </span>
+                                            <div>
+                                                <p className="heading-strong text-[11px] text-white/60">Batch</p>
+                                                <h4 className="heading-strong text-sm text-white">Class of {batch.batchYear}</h4>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-white/70">{batch.count} students</p>
+                                    </Link>
+                                ));
+                            })()}
+                        </div>
+
+                        {/* Pagination controls */}
+                        <div className="mt-6 flex items-center justify-center gap-3">
+                            <button
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                className={`px-4 py-2 rounded-lg border border-white/15 ${currentPage === 1 ? 'text-white/40' : 'hover:bg-white/10'}`}
                             >
-                                <div className="flex items-center gap-3">
-                                    <span className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <FaCalendarAlt />
-                                    </span>
-                                    <div>
-                                        <p className="heading-strong text-[11px] text-white/60">Batch</p>
-                                        <h4 className="heading-strong text-sm text-white">Class of {batch.batchYear}</h4>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-white/70">{batch.count} students</p>
-                            </Link>
-                        ))}
-                    </div>
+                                Previous
+                            </button>
+                            <span className="text-sm text-white/70">Page {currentPage} of {batches.length ? Math.ceil(batches.length / itemsPerPage) : 1}</span>
+                            <button
+                                disabled={currentPage === Math.max(1, Math.ceil(batches.length / itemsPerPage))}
+                                onClick={() => setCurrentPage(prev => Math.min(Math.max(1, Math.ceil(batches.length / itemsPerPage)), prev + 1))}
+                                className={`px-4 py-2 rounded-lg border border-white/15 ${currentPage === Math.max(1, Math.ceil(batches.length / itemsPerPage)) ? 'text-white/40' : 'hover:bg-white/10'}`}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </>
                 )}
             </section>
         </div>

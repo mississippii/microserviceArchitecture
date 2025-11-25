@@ -3,7 +3,7 @@ import axios from 'axios';
 import { MdEmail } from 'react-icons/md';
 import { FaPhone, FaGraduationCap, FaUniversity, FaTint, FaMapMarkerAlt, FaFacebook, FaInstagram, FaLinkedin, FaYoutube, FaIdBadge, FaBriefcase } from 'react-icons/fa';
 import img1 from '../assets/student.jpeg';
-import { STUDENT_API, IMAGE_BASE } from "../apiConfig.js";
+import { STUDENT_API, IMAGE_BASE, OLD_IMAGE_HOST, NEW_IMAGE_HOST } from "../apiConfig.js";
 
 const DetailItem = ({ icon, label, value, light }) => (
     <div className="flex items-start gap-2 flex-wrap justify-start text-left w-full">
@@ -131,7 +131,7 @@ const ProfileCard = ({ alumniData, variant = "dark" }) => {
         const pic = alumniData?.profilePic;
         if (!pic || !String(pic).trim().length) return null;
         if (pic.startsWith('http')) {
-            return pic.replace('192.168.0.134:8001', '192.168.0.134:8081');
+            return pic.replace(OLD_IMAGE_HOST, NEW_IMAGE_HOST);
         }
         return `${IMAGE_BASE}${pic}`;
     };
