@@ -7,7 +7,7 @@
 *.iml
 *.ipr
 *.iws
-*.xml
+#*.xml
 
 # Ignore Maven wrapper files
 .mvn/
