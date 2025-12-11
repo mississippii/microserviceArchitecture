@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 public class ProcessorApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run((Starter.class));
+        SpringApplication.run(ProcessorApplication.class, args);
     }
 
 }
