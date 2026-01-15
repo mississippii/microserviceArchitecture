@@ -65,6 +65,9 @@ public class UserService {
         return new UserProfileResponse(saved.getId(), saved.getUserName(), saved.getEmail(), saved.getRole().name());
     }
 
+    /**
+     * Authenticates user; returns token and expiry with role
+     */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -79,6 +82,9 @@ public class UserService {
         return new AuthenticationResponse(token, jwtService.tokenExpiryInstant(), role.name());
     }
 
+    /**
+     * Returns current user profile or throws exception
+     */
     public UserProfileResponse currentUserProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
@@ -96,6 +102,9 @@ public class UserService {
                 profile.getUsername(), request.getQuantity(), request.getProductId());
     }
 
+    /**
+     * Blacklists token then clears security context
+     */
     public void logout(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
@@ -108,6 +117,7 @@ public class UserService {
     }
 
     public List<UserProfileResponse> findAllUsers() {
+        // Maps users to profile responses for collection
         return userRepo.findAll()
                 .stream()
                 .map(user -> new UserProfileResponse(user.getId(), user.getUserName(), user.getEmail(), user.getRole().name()))
