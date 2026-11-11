@@ -46,4 +46,21 @@ Thumbs.db
 
 # Ignore application configuration files with sensitive data
 
+# Ignore local environment files
+.env
+.env.*
+!.env.example
+*.local
+
+# Ignore AI-agent and design-tool artifacts (not part of the app)
 .playwright-mcp/
+.impeccable/
+skills-lock.json
+CLAUDE.md
+.agents/
+
+# Ignore other editors and test output
+.vscode/
+coverage/
+.vite/
+*.tsbuildinfo
