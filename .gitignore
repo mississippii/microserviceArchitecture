@@ -4,6 +4,7 @@
 
 # Ignore IDE files
 .idea/
+.claude/
 *.iml
 *.ipr
 *.iws
@@ -45,3 +46,4 @@ Thumbs.db
 
 # Ignore application configuration files with sensitive data
 
+.playwright-mcp/

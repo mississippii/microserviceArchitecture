@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: marketplace
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/marketplace}
+    username: ${DB_USER:marketplace}
+    password: ${DB_PASSWORD:marketplace}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # schema is owned by Flyway (db/migration), never by Hibernate
+  mvc:
+    problemdetails:
+      enabled: true        # errors returned as RFC 7807 JSON
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    # 32+ chars. MUST be overridden via env var in every real environment.
+    secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
+    ttl-hours: 24
