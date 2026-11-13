@@ -52,7 +52,7 @@ Each module is one Java package: `com.marketplace.<module>`.
 | **customer** | Saved delivery addresses, cart, checkout (one order per shop, all in one transaction) | `/api/addresses` (GET, POST, PUT, DELETE), `/api/cart` (GET, POST, PUT, DELETE), `POST /api/cart/checkout` |
 | **seller** | Shop profile, location, delivery radius, status, quality score | `POST /api/sellers`, `GET`/`PUT /api/sellers/me`; staff: `GET /api/sellers`, `GET /api/sellers/{id}` (exact location, NID and payout account are owner- and staff-only); admin: `POST /api/sellers/{id}/suspension` (VERIFIED ⇄ SUSPENDED); expenses: `GET`/`POST /api/sellers/me/expenses`, `DELETE …/{id}`; counter sales (order module): `GET`/`POST /api/shop-sales`, `POST /api/shop-sales/{id}/void` |
 | **verification** | Seller submits documents → admin/verifier approves → seller becomes `VERIFIED` | `POST /api/verifications`, `GET /api/verifications/me` (latest request + reviewer note), `GET /api/verifications/pending`, `POST /api/verifications/{id}/decision` |
-| **catalog** | Category groups (2 levels), products, seller listings (price + stock), **nearby search**, public shop page | `GET /api/catalog/categories`, `GET /api/catalog/products?q&categoryId`, `GET /api/catalog/products/nearby?lat&lng`, `GET /api/catalog/products/{id}/offers?lat&lng&sort`, `GET /api/catalog/shops/{id}` (public, no address), `PUT /api/listings` (unit PCS/KG/LITRE/DOZEN/BOX/CRATE/BAG/PACK, price per unit, private cost, low-stock level, and either `stock` = exact count or `addStock` = goods received, added atomically; stock is NUMERIC so loose goods take fractions), `GET /api/listings/me/movements` (stock register with supplier/reason note and unit cost), `GET /api/listings/me`, `GET /api/listings/{id}/movements` (stock history); product requests: `POST /api/product-requests`, `GET …/me`, admin `GET /api/product-requests`, `POST …/{id}/decision`; admin: `POST`/`PUT` categories (with commission %) and products (optional `parentId` makes it a variety, stored as "আম - হিমসাগর" in the parent's category), `DELETE /api/catalog/products/{id}` (only if no seller stocks it and it has no varieties) |
+| **catalog** | Category groups (2 levels), products, seller listings (price + stock), **nearby search**, public shop page | `GET /api/catalog/categories`, `GET /api/catalog/products?q&categoryId`, `GET /api/catalog/products/nearby?lat&lng`, `GET /api/catalog/products/{id}/offers?lat&lng&sort`, `GET /api/catalog/shops/{id}` (public, no address), `PUT /api/listings` (unit PCS/KG/LITRE/DOZEN/BOX/CRATE/BAG/PACK, price per unit, private cost, low-stock level, and either `stock` = exact count or `addStock` = goods received, added atomically; stock is NUMERIC so loose goods take fractions), `GET /api/listings/me/movements` (stock register with supplier/reason note and unit cost), `GET /api/listings/me/batches` (goods on the shelf batch by batch: left, cost, expiry date), `PUT /api/listings/{id}/details` (the seller's photos, video, description, ingredients), `POST /api/listings/{id}/unit` (recount stock in another unit: `unit`, `perOld` = new units in one old, new `price`; history follows; refused while the product has open online orders), public `GET /api/catalog/listings/{id}` (those details), `POST /api/uploads` (common: seller sends a JPG/PNG/WebP ≤ 10 MB or MP4/WebM ≤ 50 MB, gets `/uploads/<random>.<ext>`), `GET /api/listings/me`, `GET /api/listings/{id}/movements` (stock history); product requests: `POST /api/product-requests`, `GET …/me`, admin `GET /api/product-requests`, `POST …/{id}/decision`; admin: `POST`/`PUT` categories (with commission %) and products (optional `parentId` makes it a variety, stored as "আম - হিমসাগর" in the parent's category), `DELETE /api/catalog/products/{id}` (only if no seller stocks it and it has no varieties) |
 | **order** | Place order, status lifecycle, cancel, stock reservation, **claims** ("not original" → refund) | `POST /api/orders`, `GET /api/orders/me`, `GET /api/orders/{id}`, `POST /api/orders/{id}/cancel`, `GET /api/orders/seller`, `POST /api/orders/{id}/status`; admin: `GET /api/orders` (latest 300); claims: `POST /api/claims` (customer, delivered orders), admin `GET /api/claims`, `POST /api/claims/{id}/decision`; money: seller `GET /api/orders/seller/money` (balance + past settlements), admin `GET /api/orders/balances`, `POST /api/orders/settlements` |
 | **payment** | Payment record per order, escrow states (hold → release / refund) | (internal, used by order) |
 | **books** | The seller's own books: customers who buy on due and their payments; purchases (stock in, paid on the spot, average cost; edit or delete any time, stock never below 0); reports (day book, customer statements, P&L, money by method). Balances are summed from rows, never stored. Reports read other modules' tables read-only. No suppliers. | `/api/books/customers` (GET, POST, PUT `{id}`, GET `{id}` = statement, `POST {id}/payments`), `POST /api/books/payments/{id}/void`, `/api/books/purchases` (GET, POST, PUT `{id}`, DELETE `{id}`), `GET /api/books/ledger?from&to`, `GET /api/books/summary?from&to`; catalog: `DELETE /api/listings/{id}` (remove a product from the shop, history kept) |
@@ -137,7 +137,7 @@ No cycles. If one module ever needs its own service (e.g. search, notifications)
 | `verification_requests` | Trust: documents a seller submits | `status` PENDING/APPROVED/REJECTED, `reviewer_id` |
 | `categories` | Groups (Food) and categories (Fruits) | `name` UNIQUE, `parent_id` → a group (max 2 levels), `image_url` |
 | `products` | The shared, comparable item ("Rajshahi Mango – Himsagar 1kg") | `category_id`, `origin_region` |
-| `listings` | **One seller's offer of one product** | `price` > 0, `stock` ≥ 0, `source_note` (batch origin), UNIQUE(`seller_id`,`product_id`) |
+| `listings` | **One seller's offer of one product** | `price` > 0 or null (not priced yet: then never `active`), `stock` ≥ 0 (= sum of its batches), `unit`, `cost_price` (weighted average), `source_note` (batch origin), seller's own `description`, `ingredients`, `image_urls` (≤ 6), `video_url`, UNIQUE(`seller_id`,`product_id`) |
 | `orders` | One order = one seller | `status` PLACED/ACCEPTED/SHIPPED/DELIVERED/CANCELLED, `total` > 0 |
 | `order_items` | Lines of an order | `quantity` > 0, `unit_price` = snapshot at order time |
 | `payments` | One per order, escrow state | `method` COD/BKASH/NAGAD/CARD, `status` PENDING/HELD/RELEASED/REFUNDED, UNIQUE(`order_id`) |
@@ -147,6 +147,8 @@ No cycles. If one module ever needs its own service (e.g. search, notifications)
 | `order_events` | Order timeline: status, who, when | one row per status change; feeds tracking |
 | `payouts` | A settlement between platform and seller, recorded when money moved | signed `amount` (+ platform paid seller, − seller paid platform), `reference` required; `orders.payout_id` marks settled orders |
 | `stock_movements` | Every stock change of a listing | `reason` RESTOCK/ADJUSTMENT/SALE/CANCELLED; `listings.stock` is the balance |
+| `stock_batches` | One receipt of goods into a listing (a shipment line, opening stock, or a count found) | `received`, `remaining` ≥ 0, `unit_cost`, optional `expires_on`; sales take from the oldest batch first and never from an expired one (a nightly job writes expired goods off as an ADJUSTMENT); `listings.stock` = sum of `remaining`; `purchase_items.batch_id` ties a shipment line to its batch |
+| `stock_allocations` | What one sale took from one batch | `ref_kind` ORDER/SHOP_SALE + `ref_id`, `quantity`, `unit_price` (after the sale's discount); a cancelled or voided sale puts the goods back in the same batch and removes the row |
 | `expenses` | Seller's business costs | category, amount > 0, date |
 | `shop_sales`, `shop_sale_items` | Walk-in sales in the physical shop (no commission, outside settlement) | payment method, agreed unit price + cost snapshot, `voided_at` |
 | `product_requests` | Seller asks for a missing catalogue product | PENDING/APPROVED/REJECTED; approval creates the product |
@@ -165,6 +167,7 @@ No cycles. If one module ever needs its own service (e.g. search, notifications)
 | **Money = `NUMERIC(12,2)` / `BigDecimal`** | Never use `double` for money (rounding errors). |
 | **Price snapshot in `order_items`** | Seller changing price later doesn't change past orders. |
 | **One order per seller** | Each seller ships separately; a multi-seller cart becomes multiple orders. |
+| **Batches sit beside the running total** | `listings.stock` still guards against overselling with one atomic UPDATE (its row lock also keeps two sales of one product in line); batches only say *which* goods left, so a shipment knows its sold %, revenue and expiry. Profit and loss keeps using the average cost. |
 | **Flyway owns the schema** | Every change is a versioned SQL file → same schema on every laptop, test and server. `ddl-auto: validate` fails fast if code and DB disagree. |
 
 ### 3.4 Changing the schema
@@ -244,16 +247,34 @@ POST /api/orders { items:[{listingId:7, quantity:2}], deliveryAddress, paymentMe
  └─ OrderService.place()  ─── ONE DATABASE TRANSACTION ───────────────────────────┐
      for each item:                                                                │
        load listing → all items same seller? else 400                             │
-       UPDATE listings SET stock = stock - 2 WHERE id = 7 AND stock >= 2          │
-         → 0 rows updated = not enough stock → 409, ROLLBACK everything            │
+       listing active and priced? else 409                                         │
        snapshot unit_price, add to total                                          │
      seller still VERIFIED? else 409                                               │
      INSERT orders (status PLACED, total)                                          │
+     for each item:                                                                │
+       UPDATE listings SET stock = stock - 2 WHERE id = 7 AND stock >= 2          │
+         → 0 rows updated = not enough stock → 409, ROLLBACK everything            │
+       take 2 from the oldest unexpired batches → stock_allocations               │
+         → only expired goods left = 409, ROLLBACK everything                      │
      INSERT order_items                                                            │
      INSERT payments (status PENDING)                                              │
  └─ COMMIT ────────────────────────────────────────────────────────────────────────┘
 ```
 The conditional `UPDATE … WHERE stock >= qty` is **atomic in PostgreSQL**: two customers buying the last item at the same moment → exactly one succeeds. No overselling, no locks in Java.
+Shop sales (`POST /api/shop-sales`) take stock the same way. A cancelled order or voided sale puts the goods back in the batches they came from.
+
+### 4.5a Shipments, batches and expiry
+```
+POST /api/books/purchases { items:[{productId, quantity, unit, unitCost?, price?, expiresOn?}], paymentMethod }
+ └─ one purchase; each line → listing (created if new; no price = in stock but not on sale)
+                            → stock + quantity, average cost updated (if a cost is given)
+                            → stock_batches row (received = remaining = quantity, unit_cost, expires_on)
+                            → purchase_items.batch_id
+Cost and price can come later: PUT /api/books/purchases/{id} (cost, expiry), PUT …/{id}/prices (price; first price puts it on sale).
+Sale → oldest unexpired batch first. Shipment page: remaining, sold and revenue per line from its batch.
+09:00 Dhaka  CatalogService.expiryAlerts()   → notify: expires today / in 3 days
+00:05 Dhaka  CatalogService.writeOffExpired() → expired remaining off stock as ADJUSTMENT at batch cost (a loss in the accounts), notify
+```
 
 ### 4.5b Commission and settlement
 ```
@@ -296,7 +317,8 @@ POST /api/reviews {orderId, rating}
 | Self-promotion | Register accepts only CUSTOMER/SELLER; ADMIN/VERIFIER are promoted by an admin |
 | Input validation | Bean Validation on every request record (BD phone regex, ranges, sizes) |
 | SQL injection | Only parameterised queries (Spring Data / `:params`) |
-| Public endpoints | Only `/api/auth/**`, `GET /api/catalog/**`, Swagger |
+| Public endpoints | Only `/api/auth/**`, `GET /api/catalog/**`, `GET /uploads/**` (sellers' product photos and videos), Swagger |
+| Uploads | Sellers only; JPG/PNG/WebP ≤ 10 MB, MP4/WebM ≤ 50 MB, checked by content type; saved under a random name whose extension comes from the type, never from the client's file name |
 
 **Creating admins** (never through the API): either promote an existing user
 ```sql
@@ -317,13 +339,18 @@ Marketplace/
 ├── docker-compose.yml                  ← PostgreSQL 16 + PostGIS
 └── src/
     ├── main/java/com/marketplace/
-    │   ├── MarketplaceApplication.java
-    │   ├── common/        SecurityConfig, Errors
+    │   ├── MarketplaceApplication.java   ← @EnableScheduling (expiry alerts, nightly write-off)
+    │   ├── common/        SecurityConfig, Errors, PayMethod, UploadController (photos/videos → /uploads/)
     │   ├── auth/          User, UserRepository, AuthService, AuthController
-    │   ├── seller/        Seller, SellerRepository, SellerService, SellerController
+    │   ├── activity/      Notification, AuditEntry, ActivityService, ActivityController
+    │   ├── seller/        Seller, Expense, SellerRepository, SellerService, SellerController
     │   ├── verification/  VerificationRequest, VerificationRepository, VerificationService, VerificationController
-    │   ├── catalog/       Category, Product, Listing, NearbyOffer, CatalogRepositories, CatalogService, CatalogController
-    │   ├── order/         Order, OrderItem, OrderRepositories, OrderService, OrderController
+    │   ├── catalog/       Category, Product, Listing, StockMovement, StockBatch, StockAllocation, NearbyOffer, NearbyProduct,
+    │   │                  ProductSuggestion, CatalogRepositories, CatalogService, CatalogController
+    │   ├── customer/      Address, CartItem, CustomerRepositories, CustomerService, CustomerController
+    │   ├── order/         Order, OrderItem, OrderEvent, Claim, Payout, ShopSale, ShopSaleItem, OrderRepositories,
+    │   │                  OrderService, OrderController, ClaimController, ShopSaleController
+    │   ├── books/         Customer, CustomerPayment, Purchase, PurchaseItem, BooksRepositories, BooksService, ReportService, BooksController
     │   ├── payment/       Payment, PaymentRepository, PaymentService
     │   └── review/        Review, ReviewRepository, ReviewService, ReviewController
     ├── main/resources/
@@ -338,6 +365,11 @@ Marketplace/
     │       └── V7__shop_sales.sql       ← walk-in (offline) sales, SHOP_SALE stock reasons
     │       └── V8__stock_units.sql      ← listing unit + low-stock level, decimal stock, register note/unit cost
     │       └── V9__product_varieties.sql ← products.parent_id: a variety (আম → হিমসাগর) is a product one level under another
+    │       └── V10–V16                  ← shop sale channel, seller books (customers, purchases, payments), no suppliers, product and category photos, shipment costs
+    │       └── V17__stock_batches.sql   ← stock_batches + stock_allocations (oldest first, expiry), purchase_items.batch_id, backfill
+    │       └── V18__listing_details.sql ← seller's description, ingredients, photos, video per listing
+    │       └── V19__price_and_cost_later.sql ← listing price and purchase cost may be empty; unpriced = not on sale
+    │       └── V20, V21                 ← group photos: Meat & Fish, Artisan Craft, Fashion
     └── test/
         ├── java/com/marketplace/MarketplaceFlowTest.java
         └── resources/docker-java.properties   ← lets Testcontainers talk to Docker 29+
@@ -355,7 +387,7 @@ mvn spring-boot:run           # app on http://localhost:8080, Flyway creates tab
 mvn test                      # full flow test on a throw-away PostGIS container
 ```
 
-Environment variables (all have dev defaults): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `PORT`.
+Environment variables (all have dev defaults): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `PORT`, `UPLOADS_DIR` (sellers' photos and videos; default `uploads/`, git-ignored).
 
 ---
 
@@ -365,12 +397,11 @@ Environment variables (all have dev defaults): `DB_URL`, `DB_USER`, `DB_PASSWORD
 |---|---|
 | bKash / Nagad / SSLCommerz gateway + callback (`PENDING → HELD`) | First online-paying customers |
 | Courier API booking (Pathao / Steadfast / RedX) | Sellers stop self-delivering |
-| Image / document upload (Cloudflare R2 / S3) | Before public seller onboarding |
+| Object storage (Cloudflare R2 / S3) with thumbnails for uploads, and upload for catalogue photos and verification documents (today: seller product media on the server disk, the rest are links) | Before public seller onboarding, or a second server |
 | Phone OTP login, refresh tokens | Before public launch |
 | SMS + browser Web Push on new order | Marketplace launch (Phase 2) |
 | Claim window (e.g. 7 days), seller penalties, claims in the quality score | Policy is decided (Phase 3) |
 | Automatic payouts through bKash/bank APIs (settlements are recorded by hand today) | Online payments go live |
 | Subscriptions and the Free plan's product limit; several typed verification documents; favourites | Plans can be paid for / verification team asks |
-| Sales made outside the platform (shop counter, Facebook) in the seller's stock and profit | Sellers ask to run their whole shop here |
 | Full-text search / Meilisearch | Catalogue > ~10k products |
 | Redis cache, rate limiting | Real traffic shows the need |

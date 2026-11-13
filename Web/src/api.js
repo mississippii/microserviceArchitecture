@@ -52,3 +52,25 @@ export const qty = (n, unit) => {
 }
 /** "/kg" after a price */
 export const per = (unit) => `/${unitOf(unit)[0]}`
+
+/** Save rows as a CSV file that Excel opens (with Bangla intact). A text cell that looks like a formula is quoted so it can't run. */
+export function downloadCsv(name, rows) {
+  const cell = (v) => {
+    let s = v == null ? '' : String(v)
+    if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`
+    return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  const url = URL.createObjectURL(new Blob([`\ufeff${rows.map((r) => r.map(cell).join(',')).join('\r\n')}`], { type: 'text/csv;charset=utf-8' }))
+  Object.assign(document.createElement('a'), { href: url, download: `${name}.csv` }).click()
+  URL.revokeObjectURL(url)
+}
+
+/** Send a photo or video to the server; gives back its address (/uploads/…). */
+export async function upload(file) {
+  const body = new FormData()
+  body.append('file', file)
+  const res = await fetch('/api/uploads', { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body })
+  const data = await res.json().catch(() => null)
+  if (!res.ok) throw new Error(res.status === 413 ? 'That file is too big. A photo can be 10 MB, a video 50 MB.' : data?.detail || `Upload failed (${res.status})`)
+  return data.url
+}

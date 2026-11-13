@@ -9,6 +9,10 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate   # schema is owned by Flyway (db/migration), never by Hibernate
+  servlet:
+    multipart:
+      max-file-size: 50MB    # a product video; photos are limited to 10 MB in UploadController
+      max-request-size: 55MB
   mvc:
     problemdetails:
       enabled: true        # errors returned as RFC 7807 JSON
@@ -17,6 +21,8 @@ server:
   port: ${PORT:8080}
 
 app:
+  uploads:
+    dir: ${UPLOADS_DIR:uploads}   # sellers' product photos and videos
   jwt:
     # 32+ chars. MUST be overridden via env var in every real environment.
     secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}

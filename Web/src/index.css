@@ -27,6 +27,7 @@
   --color-ink: #0a0a0a;
   --color-muted: #525252;
   --color-line: #e5e5e5;
+  --color-fold: #656565; /* the grey wing of the brand mark; nowhere else */
 
   /* brand = black */
   --color-brand-950: #000000;
@@ -68,6 +69,26 @@
   body {
     background: var(--color-cotton);
     color: var(--color-ink);
+    caret-color: var(--color-brand-700);
+  }
+  /* Number fields are typed, not stepped: the spinner arrows only steal width on a phone. */
+  input[type='number'] {
+    appearance: textfield;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+  /* The browser's clear button in search boxes is blue; the UI is black and white. */
+  input[type='search']::-webkit-search-cancel-button {
+    filter: grayscale(1) brightness(0.4);
+  }
+  /* A field the browser filled in keeps the form's white and ink instead of the browser's blue tint. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-ink);
+    box-shadow: 0 0 0 100px #fff inset;
     caret-color: var(--color-brand-700);
   }
   ::selection {
@@ -134,4 +155,20 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .stitch-in { animation: none; }
+}
+
+/* Printing a receipt or invoice: only the slip goes on paper. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: fixed;
+    inset: 0 0 auto 0;
+    padding: 16px;
+    background: #fff;
+  }
 }

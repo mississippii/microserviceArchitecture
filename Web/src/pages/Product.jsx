@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, Check, MapPin, Minus, Plus, RotateCcw, ShieldCheck, ShoppingCart, X } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Check, ChevronDown, MapPin, Minus, Plus, RotateCcw, ShieldCheck, ShoppingCart, X } from 'lucide-react'
 import { api, money, per } from '../api'
 import { useAuth } from '../auth'
 import { ProductImage, Rating } from '../product-ui'
@@ -12,17 +12,27 @@ export default function ProductPage() {
   const { id } = useParams()
   const [sort, setSort] = useState('PRICE')
   const [buying, setBuying] = useState(null)
+  const [open, setOpen] = useState(null) // the offer whose seller details are shown
   const product = useLoad(() => api(`/api/catalog/products/${id}`), [id])
   const offers = useLoad(() => api(`/api/catalog/products/${id}/offers?sort=${sort}`), [id, sort])
 
+  // A product with varieties (আম → হিমসাগর, ল্যাংড়া): the ones in stock are listed here, each opens its own sellers.
+  const catalogue = useLoad(() => api('/api/catalog/products'))
+  const stocked = useLoad(() => api('/api/catalog/products/nearby'))
+
   if (product.error) return <ErrorMsg error={product.error} />
   const p = product.data
-  const best = offers.data?.length ? Math.min(...offers.data.map((o) => Number(o.price))) : null
+  const inStock = new Map((stocked.data || []).map((x) => [x.id, x]))
+  const varieties = (catalogue.data || []).filter((c) => String(c.parentId) === String(id) && inStock.has(c.id))
+  const parent = p?.parentId ? catalogue.data?.find((c) => c.id === p.parentId) : null
+  const short = (name) => (p && name.startsWith(`${p.name} - `) ? name.slice(p.name.length + 3) : name)
+  const prices = [...(offers.data || []).map((o) => Number(o.price)), ...varieties.map((v) => Number(inStock.get(v.id).minPrice))]
+  const best = prices.length ? Math.min(...prices) : null
 
   return (
     <div className="space-y-5">
-      <Link to="/" className="inline-flex min-h-11 items-center gap-1 text-[15px] font-medium text-brand-700 hover:underline">
-        <ArrowLeft className="size-4" aria-hidden /> Back to shop
+      <Link to={parent ? `/p/${parent.id}` : '/'} className="inline-flex min-h-11 items-center gap-1 text-[15px] font-medium text-brand-700 hover:underline">
+        <ArrowLeft className="size-4" aria-hidden /> {parent ? parent.name : 'Back to shop'}
       </Link>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-10">
@@ -49,6 +59,23 @@ export default function ProductPage() {
             <li className="flex items-center gap-2"><RotateCcw className="size-5 shrink-0 text-brand-700" aria-hidden /> Not original? Full refund</li>
           </ul>
 
+          {varieties.length > 0 && (
+            <section aria-labelledby="varieties-heading" className="space-y-3">
+              <h2 id="varieties-heading" className="text-lg font-semibold">Varieties</h2>
+              <ul className="grid grid-cols-2 gap-2">
+                {varieties.map((v) => (
+                  <li key={v.id}>
+                    <Link to={`/p/${v.id}`} className="flex min-h-14 items-center justify-between gap-2 rounded-xl bg-white px-3 py-2 ring-1 ring-line hover:bg-brand-50">
+                      <span className="min-w-0 truncate text-sm font-medium">{short(v.name)}</span>
+                      <span className="num shrink-0 text-sm font-semibold"><span className="text-xs font-medium text-muted">from </span>{money(inStock.get(v.id).minPrice)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {!(varieties.length > 0 && offers.data?.length === 0) && (
           <section aria-labelledby="offers-heading" className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <h2 id="offers-heading" className="mr-auto text-lg font-semibold">
@@ -87,6 +114,12 @@ export default function ProductPage() {
                         <span><span className="num">{o.stock}</span> in stock</span>
                       </p>
                       {o.sourceNote && <p className="mt-1.5 text-xs text-muted">Source: {o.sourceNote}</p>}
+                      {o.hasDetails && (
+                        <button type="button" className="mt-1 inline-flex min-h-11 items-center gap-1 text-sm font-medium underline-offset-2 hover:underline"
+                                aria-expanded={open === o.listingId} onClick={() => setOpen(open === o.listingId ? null : o.listingId)}>
+                          Details <ChevronDown className={`size-4 transition-transform motion-reduce:transition-none ${open === o.listingId ? 'rotate-180' : ''}`} aria-hidden />
+                        </button>
+                      )}
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2">
                       <p className="num text-xl font-semibold text-ink">{money(o.price)}<span className="text-sm font-normal text-muted">{per(o.unit)}</span></p>
@@ -96,14 +129,45 @@ export default function ProductPage() {
                       </div>
                     </div>
                   </div>
+                  {open === o.listingId && <OfferDetails listingId={o.listingId} shopName={o.shopName} />}
                 </li>
               ))}
             </ul>
           </section>
+          )}
         </div>
       </div>
 
       {buying && p && <BuySheet offer={buying} product={p} onClose={() => { setBuying(null); offers.reload() }} />}
+    </div>
+  )
+}
+
+/** What this seller says about their own goods: photos, a video, a description, the ingredients. */
+function OfferDetails({ listingId, shopName }) {
+  const d = useLoad(() => api(`/api/catalog/listings/${listingId}`), [listingId])
+  if (d.error) return <ErrorMsg error={d.error} />
+  if (!d.data) return null
+  const { imageUrls, videoUrl, description, ingredients } = d.data
+  return (
+    <div className="mt-3 space-y-3 border-t border-line pt-3">
+      {imageUrls.length > 0 && (
+        <ul className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4" aria-label={`Photos from ${shopName}`}>
+          {imageUrls.map((url, n) => (
+            <li key={url} className="shrink-0 snap-start">
+              <ProductImage src={url} alt={`Photo ${n + 1} from ${shopName}`} className="size-28 rounded-xl ring-1 ring-line sm:size-36" />
+            </li>
+          ))}
+        </ul>
+      )}
+      {videoUrl && <video src={videoUrl} controls preload="metadata" className="max-h-72 w-full rounded-xl bg-ink" aria-label={`Video from ${shopName}`} />}
+      {description && <p className="max-w-prose whitespace-pre-line text-sm leading-relaxed">{description}</p>}
+      {ingredients && (
+        <div>
+          <h3 className="text-sm font-semibold">Ingredients</h3>
+          <p className="max-w-prose whitespace-pre-line text-sm text-muted">{ingredients}</p>
+        </div>
+      )}
     </div>
   )
 }

@@ -119,7 +119,9 @@ public class ShopSaleController {
         sale.setPaid(paid);
         sale = sales.save(sale);
         for (var line : r.items()) {
-            var listing = catalog.sellInShop(shopId, line.listingId(), line.quantity());
+            // what the line really earned per unit, with the sale's discount spread over the lines
+            var net = gross.signum() == 0 ? line.unitPrice() : line.unitPrice().multiply(total).divide(gross, 2, RoundingMode.HALF_UP);
+            var listing = catalog.sellInShop(shopId, line.listingId(), line.quantity(), sale.getId(), net);
             var item = new ShopSaleItem();
             item.setSaleId(sale.getId());
             item.setListingId(listing.getId());
@@ -138,7 +140,7 @@ public class ShopSaleController {
         var sale = sales.findById(id).filter(s -> s.getSellerId().equals(shopId(jwt))).orElseThrow(() -> Errors.notFound("sale"));
         if (sale.getVoidedAt() != null) throw Errors.conflict("sale is already void");
         sale.setVoidedAt(OffsetDateTime.now());
-        items.findBySaleId(id).forEach(i -> catalog.returnFromShopSale(i.getListingId(), i.getQuantity()));
+        items.findBySaleId(id).forEach(i -> catalog.returnFromShopSale(i.getListingId(), i.getQuantity(), id));
         return details(sale);
     }
 }

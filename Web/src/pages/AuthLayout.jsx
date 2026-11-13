@@ -4,8 +4,10 @@ import { Mark } from '../ui'
 /** A single centred card: mark, heading, form, then a way across to the other auth page. */
 export default function AuthLayout({ title, subtitle, children, footer }) {
   return (
-    <div className="-mx-3 -mt-3 -mb-10 min-h-[calc(100dvh-5rem)] bg-white sm:mx-auto sm:mb-0 sm:min-h-0 sm:mt-8 sm:max-w-[400px] sm:rounded-2xl sm:shadow-[0_1px_2px_rgb(0_0_0/0.04),0_12px_40px_rgb(0_0_0/0.08)] sm:ring-1 sm:ring-line">
-      <div className="px-6 pb-6 pt-8 sm:px-8 sm:pb-8">
+    // Fills the space under the header (main's padding cancelled) and centres the card in it, both ways.
+    // Phones: the white page is the card. A page taller than the screen (sign-up) just grows and scrolls.
+    <div className="-mx-3 -mt-3 -mb-10 flex min-h-[calc(100dvh-5.25rem)] flex-col justify-center bg-white sm:mx-0 sm:-mt-5 sm:-mb-12 sm:min-h-[calc(100dvh-5.5rem)] sm:items-center sm:bg-transparent sm:py-8">
+      <div className="w-full px-6 py-8 sm:max-w-[400px] sm:rounded-2xl sm:bg-white sm:px-8 sm:shadow-[0_1px_2px_rgb(0_0_0/0.04),0_12px_40px_rgb(0_0_0/0.08)] sm:ring-1 sm:ring-line">
         <Mark className="mx-auto size-9" />
         <h1 className="mt-4 text-center text-[22px] font-semibold tracking-tight">{title}</h1>
         {subtitle && <p className="mt-1 text-center text-sm text-muted">{subtitle}</p>}

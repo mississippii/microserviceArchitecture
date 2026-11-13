@@ -4,7 +4,7 @@ import { Banknote, BookOpen, ClipboardList, ShieldAlert, ExternalLink, FileText,
 import { ProductImage, Rating } from '../product-ui'
 import { api, money } from '../api'
 import { useAuth } from '../auth'
-import { Console, Drawer, Empty, Fab, ErrorMsg, Field, PayBadge, Segmented, StatTile, StatusBadge, Success, initials, timeAgo, useLoad } from '../ui'
+import { Console, Drawer, Empty, Fab, ErrorMsg, Field, PayBadge, Picker, Segmented, StatTile, StatusBadge, Success, initials, timeAgo, useLoad } from '../ui'
 
 const OPEN = ['PLACED', 'ACCEPTED', 'SHIPPED']
 
@@ -566,17 +566,9 @@ function Catalog() {
 
       <section className="panel mx-auto max-w-2xl" aria-label="Product">
         <div className="grid grid-cols-2 gap-2 p-4">
-          <Field label="Group">
-            <select className="input" value={group} onChange={(e) => { setPicked(e.target.value); setPid('') }}>
-              {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-            </select>
-          </Field>
-          <Field label="Product">
-            <select className="input" value={pid} onChange={(e) => { setPid(e.target.value); setError(null) }}>
-              <option value="">{inGroup.length ? `Choose (${inGroup.length})…` : 'None yet'}</option>
-              {inGroup.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </Field>
+          <Picker label="Group" value={String(group)} options={groups.map((g) => ({ value: String(g.id), label: g.name }))} onChange={(v) => { setPicked(v); setPid('') }} />
+          <Picker label="Product" value={String(pid)} disabled={!inGroup.length} placeholder={inGroup.length ? `Choose (${inGroup.length})` : 'None yet'}
+                  options={inGroup.map((p) => ({ value: String(p.id), label: p.name }))} onChange={(v) => { setPid(v); setError(null) }} />
         </div>
         <div className="px-4 empty:hidden"><ErrorMsg error={error || products.error || categories.error} /></div>
 
@@ -830,19 +822,11 @@ function ProductForm({ product, parent, group, categories, products, onSaved }) 
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className={`grid gap-2 ${subs.length ? 'grid-cols-2' : 'grid-cols-1'}`}>
-        <Field label="Group">
-          <select className="input" required value={form.group} onChange={(e) => setForm({ ...form, group: e.target.value, categoryId: '', parentId: '' })}>
-            <option value="">Choose…</option>
-            {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-          </select>
-        </Field>
+        <Picker label="Group" required value={String(form.group)} options={groups.map((g) => ({ value: String(g.id), label: g.name }))}
+                onChange={(v) => setForm({ ...form, group: v, categoryId: '', parentId: '' })} />
         {subs.length > 0 && (
-          <Field label="Category">
-            <select className="input" required value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value, parentId: '' })}>
-              <option value="">Choose…</option>
-              {subs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </Field>
+          <Picker label="Category" required value={String(form.categoryId)} options={subs.map((c) => ({ value: String(c.id), label: c.name }))}
+                  onChange={(v) => setForm({ ...form, categoryId: v, parentId: '' })} />
         )}
       </div>
 
@@ -856,12 +840,9 @@ function ProductForm({ product, parent, group, categories, products, onSaved }) 
       )}
 
       {variety && (
-        <Field label="Product">
-          <select className="input" required disabled={!form.group || (subs.length > 0 && !form.categoryId)} value={form.parentId} onChange={set('parentId')}>
-            <option value="">{inCat.length ? `Choose (${inCat.length})…` : 'No products in this category'}</option>
-            {inCat.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </Field>
+        <Picker label="Product" required disabled={!form.group || (subs.length > 0 && !form.categoryId) || !inCat.length} value={String(form.parentId)}
+                placeholder={inCat.length ? `Choose (${inCat.length})` : 'No products in this category'}
+                options={inCat.map((p) => ({ value: String(p.id), label: p.name }))} onChange={(v) => setForm({ ...form, parentId: v })} />
       )}
       {variety && siblings.length > 0 && (
         <div className="flex flex-wrap gap-1.5" aria-label="Existing varieties">

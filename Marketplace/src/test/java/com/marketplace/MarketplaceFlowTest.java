@@ -29,6 +29,15 @@ class MarketplaceFlowTest {
 
     @Autowired TestRestTemplate http;
     @Autowired JdbcTemplate jdbc;
+    @Autowired com.marketplace.catalog.CatalogService catalogService;
+
+    /** Every product's stock is exactly what is left in its batches. */
+    private void assertBatchesMatchStock() {
+        assertThat(jdbc.queryForObject("""
+                select count(*) from listings l
+                where l.stock <> coalesce((select sum(b.remaining) from stock_batches b where b.listing_id = l.id), 0)
+                """, Integer.class)).isZero();
+    }
 
     @Test
     void fullOrderFlow() {
@@ -244,8 +253,15 @@ class MarketplaceFlowTest {
         // ----- The seller's books: buy stock, sell on due, collect; the accounts work themselves out -----
         // Buy 4 at ৳120 for ৳480 cash: average cost (1×100 + 4×120) / 5 = 116
         var bought = call(HttpMethod.POST, "/api/books/purchases", seller, Map.of(
-                "items", List.of(Map.of("productId", productId, "quantity", 4, "unitCost", 120)), "paymentMethod", "CASH", "note", "Bagha orchard"));
+                "items", List.of(Map.of("productId", productId, "quantity", 4, "unitCost", 120,
+                        "expiresOn", java.time.LocalDate.now(java.time.ZoneId.of("Asia/Dhaka")).plusDays(3).toString())), "paymentMethod", "CASH", "note", "Bagha orchard"));
         assertThat(bought.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        // The shipment is its own batch with its expiry date; the morning job warns 3 days ahead
+        var openBatches = http.exchange("/api/listings/me/batches", HttpMethod.GET, auth(seller), List.class).getBody();
+        assertThat(((Map<?, ?>) openBatches.get(openBatches.size() - 1)).get("expiresOn")).isNotNull();
+        assertBatchesMatchStock();
+        catalogService.expiryAlerts();
+        assertThat(http.exchange("/api/notifications", HttpMethod.GET, auth(seller), List.class).getBody().toString()).contains("Expires in 3 days");
         assertThat(stock(listingId)).isEqualTo(5);
         assertThat(jdbc.queryForObject("select cost_price from listings where id = ?", Double.class, listingId)).isEqualTo(116.0);
         // Sell 2 to a new customer: ৳300 − ৳20 discount = ৳280, pays ৳100, owes ৳180; the account is opened from the phone
@@ -256,6 +272,12 @@ class MarketplaceFlowTest {
         assertThat(call(HttpMethod.POST, "/api/shop-sales", seller, Map.of("items", dueLine, "paymentMethod", "CASH", "discount", 20, "paid", 100,
                 "buyerPhone", "01788888888", "buyerName", "Karim")).getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(stock(listingId)).isEqualTo(3);
+        // Oldest first: the sale took the 1 old unit, then 1 of the shipment's 4. The shipment sold 1 for ৳140 (150 less its share of the discount)
+        var shipmentLine = (Map<?, ?>) ((List<?>) ((Map<?, ?>) http.exchange("/api/books/purchases", HttpMethod.GET, auth(seller), List.class).getBody().get(0)).get("items")).get(0);
+        assertThat(((Number) shipmentLine.get("remaining")).doubleValue()).isEqualTo(3.0);
+        assertThat(((Number) shipmentLine.get("sold")).doubleValue()).isEqualTo(1.0);
+        assertThat(((Number) shipmentLine.get("revenue")).doubleValue()).isEqualTo(140.0);
+        assertBatchesMatchStock();
         assertThat(call(HttpMethod.GET, "/api/shop-sales/buyer?phone=01788888888", seller, null).getBody().get("customerId")).isNotNull();
         var customers = http.exchange("/api/books/customers", HttpMethod.GET, auth(seller), List.class).getBody();
         assertThat(customers).hasSize(1);
@@ -278,6 +300,7 @@ class MarketplaceFlowTest {
         assertThat(((Number) ((Map<?, ?>) editedBuy.getBody().get("purchase")).get("total")).doubleValue()).isEqualTo(600.0);
         assertThat(stock(listingId)).isEqualTo(4);
         assertThat(jdbc.queryForObject("select cost_price from listings where id = ?", Double.class, listingId)).isEqualTo(117.0);
+        assertBatchesMatchStock();
         // The low-stock alert came on its own when the sale took stock from 5 to 3, below its level of 4
         assertThat(http.exchange("/api/notifications", HttpMethod.GET, auth(seller), List.class).getBody().toString()).contains("Low stock");
 
@@ -327,6 +350,7 @@ class MarketplaceFlowTest {
         call(HttpMethod.PUT, "/api/listings", seller, listingBody);
         assertThat(http.exchange("/api/listings/me", HttpMethod.GET, auth(seller), List.class).getBody()).hasSize(1);
         assertThat(stock(listingId)).isEqualTo(2);
+        assertBatchesMatchStock();
 
         // "Not original? Full refund": customer claims, admin refunds even though the payment was already released
         var claim = call(HttpMethod.POST, "/api/claims", customer, Map.of("orderId", orderId, "reason", "NOT_ORIGINAL",
@@ -370,6 +394,89 @@ class MarketplaceFlowTest {
                 .getBody().get("status")).isEqualTo("VERIFIED");
         assertThat(call(HttpMethod.POST, "/api/sellers/" + shopId + "/suspension", admin, Map.of("suspended", false))
                 .getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+
+        // Expired goods are never sold: 3 arrive already past their date beside the 2 good ones
+        var yesterday = java.time.LocalDate.now(java.time.ZoneId.of("Asia/Dhaka")).minusDays(1).toString();
+        assertThat(call(HttpMethod.POST, "/api/books/purchases", seller, Map.of(
+                "items", List.of(Map.of("productId", productId, "quantity", 3, "unitCost", 100, "expiresOn", yesterday)), "paymentMethod", "CASH")).getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(stock(listingId)).isEqualTo(5);
+        assertThat(call(HttpMethod.POST, "/api/shop-sales", seller, Map.of("items", List.of(Map.of("listingId", listingId, "quantity", 3, "unitPrice", 150)), "paymentMethod", "CASH"))
+                .getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(call(HttpMethod.POST, "/api/orders", customer, order(listingId, 3)).getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(stock(listingId)).isEqualTo(5); // the refused sales changed nothing
+        catalogService.writeOffExpired(); // the nightly job takes them off the shelf
+        assertThat(stock(listingId)).isEqualTo(2);
+        assertBatchesMatchStock();
+        assertThat(http.exchange("/api/notifications", HttpMethod.GET, auth(seller), List.class).getBody().toString()).contains("Expired: ");
+
+        // The seller adds a photo and details to their offer; customers can read them, nobody else can change them
+        var photo = new org.springframework.core.io.ByteArrayResource(new byte[]{1, 2, 3}) { @Override public String getFilename() { return "mango.html"; } };
+        var part = new HttpHeaders();
+        part.setContentType(MediaType.IMAGE_JPEG);
+        var form = new org.springframework.util.LinkedMultiValueMap<String, Object>();
+        form.add("file", new HttpEntity<>(photo, part));
+        var formHeaders = new HttpHeaders();
+        formHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        formHeaders.setBearerAuth(seller);
+        var uploaded = http.postForEntity("/api/uploads", new HttpEntity<>(form, formHeaders), Map.class);
+        assertThat(uploaded.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        var photoUrl = (String) uploaded.getBody().get("url");
+        assertThat(photoUrl).startsWith("/uploads/").endsWith(".jpg"); // named by us, never by the client's file name
+        assertThat(http.getForEntity(photoUrl, byte[].class).getBody()).hasSize(3);
+        part.setContentType(MediaType.TEXT_HTML);
+        assertThat(http.postForEntity("/api/uploads", new HttpEntity<>(form, formHeaders), Map.class).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        var details = Map.of("description", "Picked this week", "ingredients", "Mango", "imageUrls", List.of(photoUrl));
+        assertThat(call(HttpMethod.PUT, "/api/listings/" + listingId + "/details", seller, details).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(call(HttpMethod.PUT, "/api/listings/" + listingId + "/details", customer, details).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(call(HttpMethod.PUT, "/api/listings/" + listingId + "/details", seller, Map.of("imageUrls", List.of("javascript:alert(1)"))).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        var shown = http.getForObject("/api/catalog/listings/" + listingId, Map.class);
+        assertThat(shown.get("ingredients")).isEqualTo("Mango");
+        assertThat(shown.get("imageUrls")).isEqualTo(List.of(photoUrl));
+        assertThat(shown).doesNotContainKeys("costPrice", "stock");
+        assertThat(((Map<?, ?>) http.getForObject("/api/catalog/products/" + productId + "/offers", List.class).get(0)).get("hasDetails")).isEqualTo(true);
+
+        // A shipment can be just a product and a quantity. Without a price it is in stock but not on sale; pricing it puts it on sale
+        var lychee = call(HttpMethod.POST, "/api/catalog/products", admin, Map.of("categoryId", id(cat), "name", "Lychee"));
+        var quick = call(HttpMethod.POST, "/api/books/purchases", seller, Map.of(
+                "items", List.of(Map.of("productId", id(lychee), "quantity", 10, "unit", "KG")), "paymentMethod", "CASH"));
+        assertThat(quick.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(((Number) ((Map<?, ?>) quick.getBody().get("purchase")).get("total")).doubleValue()).isZero();
+        var quickLine = (Map<?, ?>) ((List<?>) quick.getBody().get("items")).get(0);
+        assertThat(quickLine.get("price")).isNull();
+        assertThat(quickLine.get("unitCost")).isNull();
+        var lycheeListing = ((Number) quickLine.get("listingId")).longValue();
+        assertThat(http.getForObject("/api/catalog/products/" + id(lychee) + "/offers", List.class)).isEmpty();
+        assertThat(call(HttpMethod.POST, "/api/orders", customer, order(lycheeListing, 1)).getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        var quickId = ((Number) ((Map<?, ?>) quick.getBody().get("purchase")).get("id")).longValue();
+        // the quantity can be corrected before any cost is known: 10 → 12 kg, still no cost
+        var recountedQty = call(HttpMethod.PUT, "/api/books/purchases/" + quickId, seller, Map.of(
+                "items", List.of(Map.of("id", quickLine.get("id"), "quantity", 12)), "paymentMethod", "CASH"));
+        assertThat(recountedQty.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(((Map<?, ?>) ((List<?>) recountedQty.getBody().get("items")).get(0)).get("unitCost")).isNull();
+        assertThat(stock(lycheeListing)).isEqualTo(12);
+        call(HttpMethod.PUT, "/api/books/purchases/" + quickId, seller, Map.of(
+                "items", List.of(Map.of("id", quickLine.get("id"), "quantity", 10)), "paymentMethod", "CASH"));
+                // later, from the shipment: the cost (the bill becomes ৳800), then the price
+        var costed = call(HttpMethod.PUT, "/api/books/purchases/" + quickId, seller, Map.of(
+                "items", List.of(Map.of("id", quickLine.get("id"), "quantity", 10, "unitCost", 80)), "paymentMethod", "CASH"));
+        assertThat(((Number) ((Map<?, ?>) costed.getBody().get("purchase")).get("total")).doubleValue()).isEqualTo(800.0);
+        assertThat(jdbc.queryForObject("select cost_price from listings where id = ?", Double.class, lycheeListing)).isEqualTo(80.0);
+        http.exchange("/api/books/purchases/" + quickId + "/prices", HttpMethod.PUT,
+                new HttpEntity<>(List.of(Map.of("listingId", lycheeListing, "price", 120)), auth(seller).getHeaders()), Map.class);
+        assertThat(http.getForObject("/api/catalog/products/" + id(lychee) + "/offers", List.class)).hasSize(1);
+        assertBatchesMatchStock();
+
+        // Stock already in the shop can be recounted in another unit: 10 kg at ৳80 become 20 packs at ৳40, priced again per pack
+        var recounted = call(HttpMethod.POST, "/api/listings/" + lycheeListing + "/unit", seller, Map.of("unit", "PACK", "perOld", 2, "price", 70));
+        assertThat(recounted.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(recounted.getBody().get("unit")).isEqualTo("PACK");
+        assertThat(((Number) recounted.getBody().get("stock")).doubleValue()).isEqualTo(20.0);
+        assertThat(((Number) recounted.getBody().get("costPrice")).doubleValue()).isEqualTo(40.0);
+        assertThat(((Number) recounted.getBody().get("price")).doubleValue()).isEqualTo(70.0);
+        assertBatchesMatchStock();
+        var recountedLine = (Map<?, ?>) ((List<?>) ((Map<?, ?>) http.exchange("/api/books/purchases", HttpMethod.GET, auth(seller), List.class).getBody().get(0)).get("items")).get(0);
+        assertThat(((Number) recountedLine.get("quantity")).doubleValue()).isEqualTo(20.0);
+        assertThat(call(HttpMethod.POST, "/api/listings/" + lycheeListing + "/unit", customer, Map.of("unit", "KG", "perOld", 1, "price", 70)).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
         // Another customer's token can't see this order
         assertThat(call(HttpMethod.GET, "/api/orders/" + orderId, admin, null).getStatusCode())

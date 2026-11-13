@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom'
 import { Bell, LogOut, Mail, Package, Pencil, Phone, Search, ShoppingCart, UserRound } from 'lucide-react'
 import { api } from './api'
 import { Mark, initials, timeAgo } from './ui'
@@ -185,7 +185,7 @@ function Header() {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-3 sm:gap-4 sm:px-4">
         <Link to={workspace ? homeFor(user.role) : '/'} className="flex shrink-0 items-center gap-2.5 rounded-lg">
           <Mark />
-          <span className={`text-xl font-semibold tracking-tight text-brand-800 ${workspace || isAuthPage ? '' : 'max-sm:hidden'}`} translate="no">{BRAND.name}</span>
+          <span className={`font-display text-[17px] font-semibold tracking-[0.22em] text-ink uppercase ${workspace || isAuthPage ? '' : 'max-sm:hidden'}`} translate="no">{BRAND.name}</span>
           {workspace && (
             <>
               <span className="h-5 w-px bg-line" aria-hidden />
@@ -223,6 +223,31 @@ function Header() {
   )
 }
 
+/**
+ * A seller who swipes back out of the Seller Centre would land on the customer site. Instead they are asked
+ * whether to log out; "Cancel" keeps them where they were.
+ */
+function SellerBackGuard() {
+  const { user, logout } = useAuth()
+  const location = useLocation()
+  const type = useNavigationType()
+  const navigate = useNavigate()
+  const last = useRef(location.pathname)
+  useLayoutEffect(() => { // before paint, so the customer page never flashes behind the question
+    const from = last.current
+    last.current = location.pathname
+    if (user?.role !== 'SELLER' || type !== 'POP' || !from.startsWith('/seller') || location.pathname.startsWith('/seller')) return
+    if (window.confirm('Do you want to log out?')) {
+      logout()
+      navigate('/login', { replace: true })
+    } else {
+      navigate(1)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location])
+  return null
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -230,6 +255,7 @@ export default function App() {
           <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2.5 focus:font-semibold focus:text-brand-900">
             Skip to content
           </a>
+          <SellerBackGuard />
           <Header />
           <main id="main" tabIndex={-1} className="mx-auto min-h-[60dvh] max-w-6xl px-3 pb-10 pt-3 outline-none sm:px-4 sm:pb-12 sm:pt-5">
             <Routes>

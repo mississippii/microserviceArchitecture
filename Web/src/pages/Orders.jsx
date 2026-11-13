@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { PackageSearch, ShieldAlert, Star, Store } from 'lucide-react'
 import { api, money } from '../api'
 import { ProductImage } from '../product-ui'
-import { Empty, ErrorMsg, Field, PayBadge, StatusBadge, StitchTrail, Success, timeAgo, useLoad } from '../ui'
+import { Empty, ErrorMsg, Field, PayBadge, Picker, StatusBadge, StitchTrail, Success, timeAgo, useLoad } from '../ui'
 
 const STEPS = ['Placed', 'Accepted', 'Shipped', 'Delivered']
 const EVENT = { PLACED: 'Order placed', ACCEPTED: 'Seller accepted', SHIPPED: 'On the way', DELIVERED: 'Delivered', CANCELLED: 'Cancelled' }
@@ -163,11 +163,7 @@ function ClaimForm({ orderId, onDone, onCancel }) {
         <p className="font-semibold">Report a problem</p>
         <p className="text-sm text-muted">If the product isn't original, we refund you in full. Keep the product until our team has checked.</p>
       </div>
-      <Field label="What's wrong?">
-        <select className="input" value={form.reason} onChange={set('reason')}>
-          {REASONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-      </Field>
+      <Picker label="Problem" value={form.reason} options={REASONS.map(([value, label]) => ({ value, label }))} onChange={(v) => setForm({ ...form, reason: v })} />
       <Field label="Details">
         <textarea className="input" rows={3} required maxLength={1000} autoComplete="off" value={form.details} onChange={set('details')}
                   placeholder="The box has no hologram, and the smell is different from the original…" />

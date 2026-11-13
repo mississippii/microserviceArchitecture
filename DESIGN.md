@@ -229,7 +229,7 @@ The token names `brand`, `turmeric`, `madder` and `leaf` survive from an earlier
 A strict monochrome: one near-black, white, and a short grey ladder. State is carried by words, icons and tint steps, never by hue.
 
 ### Primary
-- **Shop Black** (`brand-700`, also `brand-900`): primary buttons, the search pill's Search button, header bands, the brand mark tile, focus outlines, active tabs and segmented controls, filled count pills, radio accents.
+- **Shop Black** (`brand-700`, also `brand-900`): primary buttons, the search pill's Search button, header bands, the brand seal, focus outlines, active tabs and segmented controls, filled count pills, radio accents.
 - **Soft Black** (`brand-800`): the announcement bar, the storefront seller band, primary button hover.
 - **True Black** (`brand-950`): selection text and the deepest press state.
 
@@ -266,7 +266,7 @@ A strict monochrome: one near-black, white, and a short grey ladder. State is ca
 - **Card title** (Space Grotesk 500, 15px, two-line clamp): product names on cards, because cards use h3.
 - **Body** (400–500, 15px): lists, buttons, inputs, tab labels, filter rows. Hero lede is 16/18px muted, max ~32rem.
 - **Body small** (400, 14px): meta lines, subtitles, ratings, category labels (600), empty-state copy.
-- **Label** (600, 12px): badges, count pills, origin pills, the announcement bar (12px, 14px from sm), "Deliver to" caption at 11px.
+- **Label** (600, 12px): badges, count pills, origin pills, the announcement bar (12px, 14px from sm).
 - **Price** (600, 18px on cards, 20px on offers, 24px on the product page, ink): with a 12–14px muted "from".
 
 ### Named Rules
@@ -280,9 +280,9 @@ A strict monochrome: one near-black, white, and a short grey ladder. State is ca
 
 One centred container, max 72rem (1152px), 12px gutter on phones and 16px from sm. On phones panels and cards run edge to edge (no side borders, square corners) to use the full width (user decision). Main content starts 16px under the header (20px from sm) with 40px bottom padding (48px from sm); workspaces add 64px on phones for the fixed tab bar. Storefront sections stack 32px apart (40px from sm). Compact by default (user decision): 26–42px hero headline, 20–24px section titles, 14px card text, 12px radii on cards. Rhythm is a 4px base: 4/8/12 inside cards, 16–20 inside panels, 24 between catalogue regions.
 
-**Header.** Black announcement bar on top (storefront only), then a white bar: mark and wordmark, Deliver-to chip, a search pill that fills the middle, account links. Under sm the search drops to a full-width second row.
+**Header.** Black announcement bar on top (storefront only), then a white bar: mark and wordmark, a search pill that fills the middle, account links. Under sm the search drops to a full-width second row.
 
-**Home.** No hero (user decision): guests and customers land straight on the filterable catalogue (left filter column + grid), titled by delivery area; then a slim black seller band (text + one button). Trust promises live in the announcement bar and the footer.
+**Home.** No hero (user decision): the page opens on "Shop by category" photo tiles (four across on phones; a group shows once it has products or a photo), then one product row per group (one card per product, varieties folded in), then a slim black seller band (text + one button). The filter column + grid live only on /products. Trust promises live in the announcement bar and the footer.
 
 **/products.** Title, count and area link on the left; Filters button (below lg) and Sort select on the right. From lg, a 232px sticky filter sidebar beside the grid (3 columns, 4 from xl); below lg the same filter form opens in a bottom sheet.
 
@@ -341,7 +341,7 @@ Plain and certain; one black action per row.
 
 ### Cards / Containers
 - **Panel:** 12px, white, hairline, no shadow, 12px padding (16px from sm): forms are compact (user decision, like CBTrading's portal).
-- **Field:** outlined 44px input with the 12px muted label sitting in the top border (`Field` in `ui.jsx`), never a separate label row. Related fields pair two to a row. Money fields show ৳ inside the box (`prefix`), quantities show their unit inside (`suffix`), hint "0". Lists of choices open a `Picker` sheet (search when long), not a native dropdown.
+- **Field:** outlined 44px input with the 12px muted label sitting in the top border (`Field` in `ui.jsx`), never a separate label row. Related fields pair two to a row. Money fields show ৳ inside the box (`prefix`), quantities show their unit inside (`suffix`), hint "0". Lists of choices open a `Picker` (search when long), not a native dropdown: a bottom sheet on phones; from sm a compact dropdown fixed right under its field (above it when there is no room below), as wide as the field (min 200px), max 300px tall, 36px rows, 12px radius with the dropdown shadow; Escape or a click outside closes only the dropdown. Units are written short in pickers (KG, not Kilogram).
 - **Form sheet (tradebazaar):** the form is split into `FormSection`s (28px icon chip + 14px title, hairline between). The running total and the save button sit in the `Drawer` footer, pinned while the fields scroll.
 - **Phone pages:** Home shows products as two-across photo tiles; Sells opens with a Today panel (today · in shop · online); Accounts is money only: shop settings live in the "My shop" sheet, expenses are added from a sheet.
 - **Product Card:** 16px, white, card-rest shadow and hairline ring, square photo (`-sm` thumbnail), origin pill, two-line 15px grotesk name, ink price with muted "from", muted seller-count and distance. Without an area: "Set your area to see prices".
@@ -359,8 +359,8 @@ Plain and certain; one black action per row.
 
 ### Navigation
 - **Announcement bar:** `brand-800`, centred 12/14px paper-grey text with the refund promise in white, underlined.
-- **Header:** white, sticky, hairline seam. Mark plus 20px wordmark; on workspaces a paper-grey role chip (Seller Centre, Admin). Sign up is a black button; Log in, My orders, Log out are 44px ink icon buttons with labels from sm/md.
-- **Deliver-to chip:** black map-pin, 11px muted "Deliver to" over the 14px semibold area name, chevron; paper-grey hover; opens the location sheet.
+- **Brand mark:** the owner's bird logo (source: `~/Pictures/site images/Logo.pdf`), traced to vectors in `Mark` (`ui.jsx`) and `public/icon.svg`: a black bird in flight with one grey wing (`--color-fold` #656565, used nowhere else) on a white disc inside a thin black ring (4% of the width, about 1.3px at 32px). No letter, so it survives a change of name. On black grounds (the footer) the ring and the bird turn white and the grey wing stays. The tab icon is the ringed disc; home-screen icons are the ringed disc on white. The wordmark is the brand name in Space Grotesk semibold capitals, tracked 0.22em (17px header, 15px footer).
+- **Header:** white, sticky, hairline seam. Mark plus wordmark; on workspaces a paper-grey role chip (Seller Centre, Admin). Sign up is a black button; Log in, My orders, Log out are 44px ink icon buttons with labels from sm/md.
 - **Search pill:** full-round, paper grey at rest, white with black border and ring on focus, 20px search icon left, a 36px black full-round "Search" button inset right.
 - **Section tabs, phone:** fixed white bottom bar, hairline top, 64px, 24px icon over 12px label; active is black with heavier stroke and a 2px top bar. Count pills: black with white text for information, white with an ink ring for attention.
 - **Section tabs, sm+:** 44px top row; active gets black text, a black count pill and a 2px underline; inactive pills are hairline grey.
@@ -371,10 +371,26 @@ Plain and certain; one black action per row.
 - **Workspaces** no longer use a black band; identity sits in the sidebar (lg) or a compact row (phones): a 40px black initials/icon tile, semibold name, 12px muted status.
 
 ### Bottom Sheet
-Location picker, catalogue filters and BuySheet: 45% black scrim, white sheet with 24px top corners (centred dialog from sm, except filters, which are phone-only), sticky title row with a 44px close, safe-area padding, max 85–90% viewport height. BuySheet: thumbnail header, quantity stepper, address, a cotton total strip with "Cash on delivery", one full-width black Place order.
+Catalogue filters and BuySheet: 45% black scrim, white sheet with 24px top corners (centred dialog from sm, except filters, which are phone-only), sticky title row with a 44px close, safe-area padding, max 85–90% viewport height. BuySheet: thumbnail header, quantity stepper, address, a cotton total strip with "Cash on delivery", one full-width black Place order.
 
 ### Product Image
 Every photo goes through one component: lazy, async-decoded, `object-cover`, `-sm` variant for cards, tiles and thumbnails. A missing or broken image falls back to paper grey with a mid-grey image-off icon.
+
+### Product Cards and Varieties
+- **One card per product** on the home page: a product with varieties (আম → হিমসাগর, ল্যাংড়া) shows once, with the lowest price and "N varieties" in the muted meta line instead of the seller count.
+- **Varieties on the product page:** a two-column grid of white, hairline-ringed tiles (min 56px), variety name left, muted "from" plus the price right; each opens that variety's sellers. The variety page's back link names the product.
+
+### Stock Badges
+OUT, LOW and EXPIRING share one style: a black 10px uppercase tag on the tile's top-right corner (OUT wins, then EXPIRING, then LOW). In lists the same states are written as words in semibold ink ("Out of stock", "3 kg left · expiring"). Missing data is said in words too: "No price", "Add cost · Add price".
+
+### Forms That Add Lines
+The new-shipment form follows CBTrading: the product is picked once, then one composer row (Variety, then Unit, Qty, black **+ Add**) puts each line into an "Items" list below, each line with a 44px ✕. Optional fields sit behind a "Cost and price" disclosure with a chevron, so the minimum entry is product and quantity.
+
+### Media Upload
+Photo slots are a 4-column grid of square tiles; the add tile is a dashed hairline square with an image-plus icon and "Photo" (reads "Sending…" while uploading). A remove control is a 24px black circle with a white ✕ inside a 44px hit area on the tile's corner. Video is one full-width dashed quiet button; once added it plays inline on black with a "Remove video" danger button. Save stays disabled while a file uploads.
+
+### Receipts and Invoices
+A slip in a drawer: shop name and address, a hairline-ruled number/date row, buyer, lines with qty × price and the amount right-aligned, then Discount, Total, Paid and Due. One black "Print" button; printing (`.print-area`) puts only the slip on paper, black on white. Export buttons are quiet buttons with a download icon.
 
 ### Stitch Trail
 Knots for steps, dashed thread between, labels under. Pending thread `brand-200`; reached knots and thread are ink; cancelled is muted. Only the newly stitched segment animates (clip-path reveal, 700ms, `cubic-bezier(0.16, 1, 0.3, 1)`, off under reduced motion). Used for orders and seller onboarding.
@@ -389,7 +405,7 @@ A black-filled star and the 0–100 score as tabular 0.0–5.0, 14px semibold; n
 - **Do** give every row, offer, sheet or form exactly one filled black primary, with quiet or ink-text secondaries.
 - **Do** print every price ink, semibold and tabular, with a muted "from" or "Total" prefix.
 - **Do** carry state with a word or icon (badge labels, alert/check icons, aria-labels), since tint steps alone are too close to read.
-- **Do** follow the storefront layout: announcement bar, search pill with Deliver-to chip, no hero, filters + grid, black seller band.
+- **Do** follow the storefront layout: announcement bar, search pill (no Deliver-to chip: browsing needs no location), no hero, category tiles then one row per group, black seller band.
 - **Do** put catalogue filters in a 260px sticky sidebar from lg and in a bottom sheet below it.
 - **Do** set h1–h3 in Space Grotesk and everything else in Plus Jakarta Sans, with tabular numerals for numbers.
 - **Do** keep tap targets at least 44px and put workspace sections in the bottom tab bar on phones.
@@ -398,7 +414,7 @@ A black-filled star and the 0–100 score as tabular 0.0–5.0, 14px semibold; n
 ### Don't:
 - **Don't** reintroduce green, mango, madder, navy or any other hue behind the `brand`, `turmeric`, `madder` or `leaf` tokens.
 - **Don't** tint a price, or fill a primary button with anything but black (white on black bands).
-- **Don't** use the running stitch as ornament; it means progress or the brand mark only.
+- **Don't** use the running stitch as ornament; it means progress only.
 - **Don't** put text on a photo without the black scrim, or show a broken-image glyph.
 - **Don't** add shadows to panels, lists or forms; lift only photo cards, floating hero cards, overlap tiles and the auth card.
 - **Don't** use decorative gradients, blur or glass; the photo scrim is the only gradient.

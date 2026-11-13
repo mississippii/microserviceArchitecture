@@ -22,6 +22,8 @@ public class CatalogService {
     private final ListingRepository listings;
     private final SellerService sellerService;
     private final StockMovementRepository movements;
+    private final StockBatchRepository batches;
+    private final StockAllocationRepository allocations;
     private final ProductRequestRepository requests;
     private final ActivityService activity;
     private final jakarta.persistence.EntityManager entityManager;
@@ -163,12 +165,82 @@ public class CatalogService {
         // A typed cost replaces the average. Received goods are averaged in by receive() instead.
         if (c.addStock() == null && c.costPrice() != null) l.setCostPrice(c.costPrice());
         l = listings.saveAndFlush(l);
-        if (c.addStock() != null) return receive(l, c.addStock(), c.costPrice(), c.note());
+        if (c.addStock() != null) {
+            receive(l, c.addStock(), c.costPrice(), c.note(), null);
+            return l;
+        }
         var diff = l.getStock().subtract(before);
         if (diff.signum() != 0) {
             // Opening stock of a new product counts as received; a later correction is a gain or loss at the average cost.
             move(l.getId(), diff, isNew ? StockMovement.Reason.RESTOCK : StockMovement.Reason.ADJUSTMENT, l.getCostPrice(), c.note());
+            if (diff.signum() > 0) addBatch(l.getId(), diff, l.getCostPrice(), null);
+            else take(l.getId(), diff.negate(), null, null, null);
         }
+        return l;
+    }
+
+    private static String blankToNull(String v) {
+        return v == null || v.isBlank() ? null : v.trim();
+    }
+
+    /** The seller describes their own offer: photos, a video, a description, the ingredients. */
+    @Transactional
+    public Listing setDetails(Long sellerUserId, Long listingId, String description, String ingredients, List<String> imageUrls, String videoUrl) {
+        var shopId = sellerService.myShop(sellerUserId).getId();
+        var l = listings.findById(listingId).filter(x -> x.getSellerId().equals(shopId) && x.getDeletedAt() == null)
+                .orElseThrow(() -> Errors.notFound("product"));
+        l.setDescription(blankToNull(description));
+        l.setIngredients(blankToNull(ingredients));
+        l.setImageUrls(imageUrls.toArray(String[]::new));
+        l.setVideoUrl(blankToNull(videoUrl));
+        return l;
+    }
+
+    public record ListingDetails(Long listingId, String description, String ingredients, String[] imageUrls, String videoUrl) {}
+
+    /** Public: only what the seller wrote for customers, and only while the offer is on sale at a verified shop. */
+    public ListingDetails listingDetails(Long listingId) {
+        var l = listings.findById(listingId).filter(x -> x.isActive() && x.getDeletedAt() == null)
+                .filter(x -> sellerService.get(x.getSellerId()).getStatus() == com.marketplace.seller.Seller.Status.VERIFIED)
+                .orElseThrow(() -> Errors.notFound("listing " + listingId));
+        return new ListingDetails(l.getId(), l.getDescription(), l.getIngredients(), l.getImageUrls(), l.getVideoUrl());
+    }
+
+    /**
+     * Stock already counted in one unit is recounted in another: 10 crates of 20 kg become 200 kg, and a cost of
+     * ৳1,400 a crate becomes ৳70 a kg. perOld = new units in one old unit. The price is given again, per new unit.
+     * The product's own history (batches, shipments, shop sales, stock register) is recounted with it, so a later
+     * edit, void or report still adds up. Money totals don't change, only how the quantity is written.
+     */
+    // ponytail: rewrites other modules' rows for this listing in one place (a unit change is one bookkeeping event).
+    // Delivered online orders keep their old quantities, so the product-profit report shows those in the new unit's name.
+    @Transactional
+    public Listing convertUnit(Long sellerUserId, Long listingId, Listing.Unit unit, BigDecimal perOld, BigDecimal price) {
+        var shopId = sellerService.myShop(sellerUserId).getId();
+        var l = listings.findById(listingId).filter(x -> x.getSellerId().equals(shopId) && x.getDeletedAt() == null)
+                .orElseThrow(() -> Errors.notFound("product"));
+        if (unit == l.getUnit()) throw Errors.badRequest("it is already counted in " + unit.name().toLowerCase());
+        entityManager.refresh(l, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        var open = ((Number) entityManager.createNativeQuery("""
+                SELECT COUNT(*) FROM order_items i JOIN orders o ON o.id = i.order_id
+                WHERE i.listing_id = :id AND o.status IN ('PLACED', 'ACCEPTED', 'SHIPPED')
+                """).setParameter("id", listingId).getSingleResult()).longValue();
+        if (open > 0) throw Errors.conflict("finish or cancel this product's open online orders before changing its unit");
+        entityManager.flush();
+        for (var sql : List.of(
+                "UPDATE stock_batches SET received = round(received * :f, 3), remaining = round(remaining * :f, 3), unit_cost = round(unit_cost / :f, 2) WHERE listing_id = :id",
+                "UPDATE stock_allocations SET quantity = round(quantity * :f, 3), unit_price = round(unit_price / :f, 2) WHERE batch_id IN (SELECT id FROM stock_batches WHERE listing_id = :id)",
+                "UPDATE purchase_items SET quantity = round(quantity * :f, 3), unit_cost = round(unit_cost / :f, 2) WHERE listing_id = :id",
+                "UPDATE stock_movements SET change = round(change * :f, 3), unit_cost = round(unit_cost / :f, 2) WHERE listing_id = :id",
+                "UPDATE shop_sale_items SET quantity = round(quantity * :f, 3), unit_price = round(unit_price / :f, 2), unit_cost = round(unit_cost / :f, 2) WHERE listing_id = :id",
+                // the stock is exactly what its batches hold, so rounding can't pull them apart
+                "UPDATE listings SET stock = COALESCE((SELECT SUM(remaining) FROM stock_batches WHERE listing_id = :id), 0), cost_price = round(cost_price / :f, 2), reorder_level = round(reorder_level * :f, 3) WHERE id = :id")) {
+            entityManager.createNativeQuery(sql).setParameter("f", perOld).setParameter("id", listingId).executeUpdate();
+        }
+        entityManager.refresh(l);
+        l.setUnit(unit);
+        if (price != null && l.getPrice() == null) l.setActive(true); // priced for the first time: it goes on sale, as in setPrice
+        l.setPrice(price);
         return l;
     }
 
@@ -177,6 +249,7 @@ public class CatalogService {
     public Listing setPrice(Long sellerId, Long listingId, BigDecimal price) {
         var l = listings.findById(listingId).filter(x -> x.getSellerId().equals(sellerId) && x.getDeletedAt() == null)
                 .orElseThrow(() -> Errors.notFound("product"));
+        if (l.getPrice() == null) l.setActive(true); // priced for the first time: it goes on sale
         l.setPrice(price);
         return l;
     }
@@ -192,47 +265,186 @@ public class CatalogService {
             return upsertListing(sellerUserId, new StockChange(productId, price == null ? old.getPrice() : price, null,
                     unit == null ? old.getUnit() : unit, old.getReorderLevel(), null, null, null, old.getSourceNote(), true));
         }
-        if (price == null) throw Errors.badRequest("set a selling price for " + product(productId).getName());
-        return upsertListing(sellerUserId, new StockChange(productId, price, null, unit, null, null, null, null, null, true));
+        // No price yet: the product is in the shop's stock but not on sale online until it gets one.
+        return upsertListing(sellerUserId, new StockChange(productId, price, null, unit, null, null, null, null, null, price != null));
     }
 
-    /** Goods received into one of the shop's listings: stock goes up and the average cost follows. */
+    /** Goods received into one of the shop's listings: stock goes up, the average cost follows, and they become a batch (its id is returned). */
     @Transactional
-    public Listing receiveStock(Long sellerId, Long listingId, BigDecimal qty, BigDecimal unitCost, String note) {
+    public Long receiveStock(Long sellerId, Long listingId, BigDecimal qty, BigDecimal unitCost, String note, java.time.LocalDate expiresOn) {
         var l = listing(listingId);
         if (!l.getSellerId().equals(sellerId)) throw Errors.notFound("listing " + listingId);
-        return receive(l, qty, unitCost, note);
+        return receive(l, qty, unitCost, note, expiresOn).getId();
     }
 
-    private Listing receive(Listing l, BigDecimal qty, BigDecimal unitCost, String note) {
+    private StockBatch receive(Listing l, BigDecimal qty, BigDecimal unitCost, String note, java.time.LocalDate expiresOn) {
         listings.receive(l.getId(), qty, unitCost); // atomic: a sale landing meanwhile isn't overwritten
         move(l.getId(), qty, StockMovement.Reason.RESTOCK, unitCost, note);
         entityManager.refresh(l);
-        return l;
+        return addBatch(l.getId(), qty, unitCost != null ? unitCost : l.getCostPrice(), expiresOn);
+    }
+
+    // ---------- batches: oldest goods are sold first ----------
+    // Every method below runs after the caller has updated the listing row, so its row lock keeps two sales of one product in line.
+
+    private StockBatch addBatch(Long listingId, BigDecimal qty, BigDecimal unitCost, java.time.LocalDate expiresOn) {
+        var b = new StockBatch();
+        b.setListingId(listingId);
+        b.setReceived(qty);
+        b.setRemaining(qty);
+        b.setUnitCost(unitCost);
+        b.setExpiresOn(expiresOn);
+        return batches.save(b);
+    }
+
+    private static java.time.LocalDate today() {
+        return java.time.LocalDate.now(java.time.ZoneId.of("Asia/Dhaka"));
+    }
+
+    /** Goods can be sold up to and including their expiry date. */
+    private static boolean expired(StockBatch b) {
+        return b.getExpiresOn() != null && b.getExpiresOn().isBefore(today());
     }
 
     /**
-     * A purchase line was edited, or deleted (newQty 0): stock and the average cost move by the difference.
-     * Always allowed; stock just never goes below 0 (goods already sold stay sold, at the cost they were sold at).
+     * Goods leave the shelf, oldest batch first. A sale never takes expired goods: if the rest has expired, it is refused.
+     * kind = null: not a sale (a count correction), so nothing is recorded against the batch, and expired goods go first.
+     */
+    private void take(Long listingId, BigDecimal qty, StockAllocation.Ref kind, Long refId, BigDecimal unitPrice) {
+        var left = qty;
+        var open = new java.util.ArrayList<>(batches.findByListingIdAndRemainingGreaterThanOrderById(listingId, BigDecimal.ZERO));
+        if (kind == null) open.sort(Comparator.comparing(b -> !expired(b))); // stable: expired first, then oldest
+        for (var b : open) {
+            if (left.signum() <= 0) break;
+            if (kind != null && expired(b)) continue;
+            var n = b.getRemaining().min(left);
+            b.setRemaining(b.getRemaining().subtract(n));
+            left = left.subtract(n);
+            if (kind == null) continue;
+            var a = new StockAllocation();
+            a.setBatchId(b.getId());
+            a.setRefKind(kind);
+            a.setRefId(refId);
+            a.setQuantity(n);
+            a.setUnitPrice(unitPrice);
+            allocations.save(a);
+        }
+        if (kind != null && left.signum() > 0) {
+            throw Errors.conflict("only " + qty.subtract(left).stripTrailingZeros().toPlainString() + " of "
+                    + product(listing(listingId).getProductId()).getName() + " can be sold; the rest has expired");
+        }
+    }
+
+    /**
+     * Just after midnight: goods past their expiry date come off the shelf as a loss at cost, so nobody can buy them
+     * and customers no longer see them in stock. (Between midnight and this job, take() already refuses them.)
+     */
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 5 0 * * *", zone = "Asia/Dhaka")
+    @Transactional
+    public void writeOffExpired() {
+        for (var b : batches.findExpired(today())) {
+            var l = listing(b.getListingId());
+            entityManager.refresh(l, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            entityManager.refresh(b); // a sale may have taken from it just before the lock
+            var gone = b.getRemaining();
+            if (gone.signum() == 0) continue;
+            l.setStock(l.getStock().subtract(gone).max(BigDecimal.ZERO));
+            b.setRemaining(BigDecimal.ZERO);
+            move(l.getId(), gone.negate(), StockMovement.Reason.ADJUSTMENT, b.getUnitCost() != null ? b.getUnitCost() : l.getCostPrice(), "Expired");
+            if (l.getDeletedAt() != null) continue;
+            activity.notify(sellerService.get(l.getSellerId()).getUserId(), "Expired: " + product(l.getProductId()).getName(),
+                    gone.stripTrailingZeros().toPlainString() + " " + l.getUnit().name().toLowerCase() + " came off your stock. It can't be sold.",
+                    "/seller?tab=stock&product=" + l.getProductId());
+        }
+    }
+
+    /** A cancelled or voided sale: the goods go back into the batches they came from. Anything unaccounted for becomes a batch of its own. */
+    private void giveBack(Listing l, BigDecimal qty, StockAllocation.Ref kind, Long refId) {
+        var left = qty;
+        for (var a : allocations.findForSale(kind, refId, l.getId())) {
+            if (left.signum() <= 0) break;
+            var n = a.getQuantity().min(left);
+            var b = batches.findById(a.getBatchId()).orElseThrow();
+            b.setRemaining(b.getRemaining().add(n));
+            left = left.subtract(n);
+            if (n.compareTo(a.getQuantity()) == 0) allocations.delete(a);
+            else a.setQuantity(a.getQuantity().subtract(n));
+        }
+        if (left.signum() > 0) addBatch(l.getId(), left, l.getCostPrice(), null);
+    }
+
+    /** What sold out of a batch. revenue leaves out online orders refunded to the customer: those goods are gone and earned nothing. */
+    public record BatchSales(BigDecimal sold, BigDecimal revenue) {}
+
+    public java.util.Map<Long, BatchSales> batchSales(java.util.Collection<Long> batchIds) {
+        var out = new java.util.HashMap<Long, BatchSales>();
+        if (batchIds.isEmpty()) return out;
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = entityManager.createNativeQuery("""
+                SELECT a.batch_id, SUM(a.quantity),
+                       COALESCE(SUM(a.quantity * a.unit_price) FILTER (WHERE NOT (a.ref_kind = 'ORDER' AND EXISTS (
+                           SELECT 1 FROM payments p WHERE p.order_id = a.ref_id AND p.status = 'REFUNDED'))), 0)
+                FROM stock_allocations a WHERE a.batch_id IN (:ids) GROUP BY a.batch_id
+                """).setParameter("ids", batchIds).getResultList();
+        for (var r : rows) out.put(((Number) r[0]).longValue(), new BatchSales((BigDecimal) r[1], (BigDecimal) r[2]));
+        return out;
+    }
+
+    public StockBatch batch(Long batchId) {
+        return batches.findById(batchId).orElseThrow(() -> Errors.notFound("batch " + batchId));
+    }
+
+    /** Every batch with goods left in the seller's shop, oldest first. */
+    public List<StockBatch> myBatches(Long sellerUserId) {
+        return batches.findOpenForSeller(sellerService.myShop(sellerUserId).getId());
+    }
+
+    /** Every morning: tell sellers about goods that expire today or in 3 days. */
+    // ponytail: matches exact days, so a morning the server is down is a missed alert; add a notified flag on the batch if that matters.
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 9 * * *", zone = "Asia/Dhaka")
+    @Transactional
+    public void expiryAlerts() {
+        var today = today();
+        for (var b : batches.findExpiringOn(List.of(today, today.plusDays(3)))) {
+            var l = listing(b.getListingId());
+            if (l.getDeletedAt() != null) continue;
+            var left = b.getRemaining().stripTrailingZeros().toPlainString() + " " + l.getUnit().name().toLowerCase();
+            activity.notify(sellerService.get(l.getSellerId()).getUserId(),
+                    (b.getExpiresOn().equals(today) ? "Expires today: " : "Expires in 3 days: ") + product(l.getProductId()).getName(),
+                    left + " left from this shipment.", "/seller?tab=stock&product=" + l.getProductId());
+        }
+    }
+
+    /**
+     * A shipment line was edited, or deleted (newQty 0): the batch, the stock and the average cost move by the difference.
+     * Always allowed; goods already gone from the batch stay gone, so only what is left of it can come off the shelf.
      */
     @Transactional
-    public void reviseReceipt(Long listingId, BigDecimal oldQty, BigDecimal oldCost, BigDecimal newQty, BigDecimal newCost, String note) {
-        var l = listing(listingId);
+    public void reviseReceipt(Long batchId, BigDecimal newQty, BigDecimal newCost, java.time.LocalDate expiresOn, String note) {
+        var b = batch(batchId);
+        var l = listing(b.getListingId());
         entityManager.refresh(l, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE); // no sale can land between the read and the write
+        if (newCost == null) newCost = b.getUnitCost() != null ? b.getUnitCost() : l.getCostPrice(); // no cost given: nothing changes in value
+        var gone = b.getReceived().subtract(b.getRemaining());
+        var remaining = newQty.subtract(gone).max(BigDecimal.ZERO);
         var stock = l.getStock();
-        var left = stock.subtract(oldQty).add(newQty);
-        if (left.signum() > 0 && newQty.signum() > 0 && l.getCostPrice() == null) {
+        var after = stock.subtract(b.getRemaining()).add(remaining).max(BigDecimal.ZERO);
+        if (after.signum() > 0 && remaining.signum() > 0 && l.getCostPrice() == null) {
             l.setCostPrice(newCost);
-        } else if (left.signum() > 0 && l.getCostPrice() != null) {
-            var value = stock.multiply(l.getCostPrice()).subtract(oldQty.multiply(oldCost)).add(newQty.multiply(newCost));
-            l.setCostPrice(value.divide(left, 2, java.math.RoundingMode.HALF_UP).max(BigDecimal.ZERO));
+        } else if (after.signum() > 0 && l.getCostPrice() != null && newCost != null) {
+            var oldCost = b.getUnitCost() == null ? l.getCostPrice() : b.getUnitCost();
+            var value = stock.multiply(l.getCostPrice()).subtract(b.getRemaining().multiply(oldCost)).add(remaining.multiply(newCost));
+            l.setCostPrice(value.divide(after, 2, java.math.RoundingMode.HALF_UP).max(BigDecimal.ZERO));
         }
-        var after = left.max(BigDecimal.ZERO);
         l.setStock(after);
         var change = after.subtract(stock);
         if (change.signum() != 0) {
-            move(listingId, change, change.signum() > 0 ? StockMovement.Reason.RESTOCK : StockMovement.Reason.PURCHASE_CANCEL, newQty.signum() > 0 ? newCost : oldCost, note);
+            move(l.getId(), change, change.signum() > 0 ? StockMovement.Reason.RESTOCK : StockMovement.Reason.PURCHASE_CANCEL, newCost, note);
         }
+        b.setReceived(newQty);
+        b.setRemaining(remaining);
+        b.setUnitCost(newCost);
+        b.setExpiresOn(expiresOn);
     }
 
     /** The seller takes a product out of the shop. What was left counts as written off at cost; history stays. */
@@ -244,6 +456,7 @@ public class CatalogService {
         entityManager.refresh(l, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
         if (l.getStock().signum() > 0) move(listingId, l.getStock().negate(), StockMovement.Reason.ADJUSTMENT, l.getCostPrice(), "Product removed");
         l.setStock(BigDecimal.ZERO);
+        batches.empty(listingId);
         l.setActive(false);
         l.setDeletedAt(java.time.OffsetDateTime.now());
     }
@@ -381,39 +594,43 @@ public class CatalogService {
 
     /** Must run inside the caller's transaction so a later failure rolls the stock back too. */
     @Transactional
-    public void reserveStock(Long listingId, int qty) {
+    public void reserveStock(Long listingId, int qty, Long orderId, BigDecimal unitPrice) {
         var q = BigDecimal.valueOf(qty);
         var l = listing(listingId);
         if (listings.decrementStock(listingId, q) == 0) {
             throw Errors.conflict("not enough stock for listing " + listingId);
         }
         move(listingId, q.negate(), StockMovement.Reason.SALE);
+        take(listingId, q, StockAllocation.Ref.ORDER, orderId, unitPrice);
         warnIfLow(l, q);
     }
 
     @Transactional
-    public void releaseStock(Long listingId, int qty) {
+    public void releaseStock(Long listingId, int qty, Long orderId) {
         var q = BigDecimal.valueOf(qty);
         listings.incrementStock(listingId, q);
         move(listingId, q, StockMovement.Reason.CANCELLED);
+        giveBack(listing(listingId), q, StockAllocation.Ref.ORDER, orderId);
     }
 
-    /** Sold at the counter: the seller's own listing, any visibility. */
+    /** Sold at the counter: the seller's own listing, any visibility. unitPrice is what the line earned per unit, after the sale's discount. */
     @Transactional
-    public Listing sellInShop(Long sellerId, Long listingId, BigDecimal qty) {
+    public Listing sellInShop(Long sellerId, Long listingId, BigDecimal qty, Long saleId, BigDecimal unitPrice) {
         var l = listing(listingId);
         if (!l.getSellerId().equals(sellerId)) throw Errors.notFound("listing " + listingId);
         if (listings.decrementAnyStock(listingId, qty) == 0) {
             throw Errors.conflict("only " + l.getStock().stripTrailingZeros().toPlainString() + " left of listing " + listingId);
         }
         move(listingId, qty.negate(), StockMovement.Reason.SHOP_SALE);
+        take(listingId, qty, StockAllocation.Ref.SHOP_SALE, saleId, unitPrice);
         warnIfLow(l, qty);
         return l;
     }
 
     @Transactional
-    public void returnFromShopSale(Long listingId, BigDecimal qty) {
+    public void returnFromShopSale(Long listingId, BigDecimal qty, Long saleId) {
         listings.incrementStock(listingId, qty);
         move(listingId, qty, StockMovement.Reason.SHOP_SALE_VOID);
+        giveBack(listing(listingId), qty, StockAllocation.Ref.SHOP_SALE, saleId);
     }
 }

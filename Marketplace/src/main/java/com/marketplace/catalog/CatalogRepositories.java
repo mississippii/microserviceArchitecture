@@ -56,6 +56,31 @@ interface StockMovementRepository extends JpaRepository<StockMovement, Long> {
     List<StockMovement> findForSeller(@Param("sellerId") Long sellerId, org.springframework.data.domain.Pageable page);
 }
 
+interface StockBatchRepository extends JpaRepository<StockBatch, Long> {
+    /** Batches with goods left, oldest first. */
+    List<StockBatch> findByListingIdAndRemainingGreaterThanOrderById(Long listingId, java.math.BigDecimal zero);
+
+    /** Every batch with goods left in the shop, oldest first. */
+    @Query("select b from StockBatch b where b.remaining > 0 and b.listingId in (select l.id from Listing l where l.sellerId = :sellerId and l.deletedAt is null) order by b.id")
+    List<StockBatch> findOpenForSeller(@Param("sellerId") Long sellerId);
+
+    @Query("select b from StockBatch b where b.remaining > 0 and b.expiresOn < :today order by b.id")
+    List<StockBatch> findExpired(@Param("today") java.time.LocalDate today);
+
+    @Query("select b from StockBatch b where b.remaining > 0 and b.expiresOn in :days")
+    List<StockBatch> findExpiringOn(@Param("days") List<java.time.LocalDate> days);
+
+    @Modifying
+    @Query("update StockBatch b set b.remaining = 0 where b.listingId = :listingId")
+    int empty(@Param("listingId") Long listingId);
+}
+
+interface StockAllocationRepository extends JpaRepository<StockAllocation, Long> {
+    /** What a sale took of one listing, newest batch first. */
+    @Query("select a from StockAllocation a where a.refKind = :kind and a.refId = :refId and a.batchId in (select b.id from StockBatch b where b.listingId = :listingId) order by a.batchId desc")
+    List<StockAllocation> findForSale(@Param("kind") StockAllocation.Ref kind, @Param("refId") Long refId, @Param("listingId") Long listingId);
+}
+
 interface ProductRequestRepository extends JpaRepository<ProductSuggestion, Long> {
     List<ProductSuggestion> findBySellerIdOrderByIdDesc(Long sellerId);
 
@@ -117,6 +142,7 @@ interface ListingRepository extends JpaRepository<Listing, Long> {
                    l.unit          AS "unit",
                    l.source_note   AS "sourceNote",
                    s.quality_score AS "qualityScore",
+                   (l.description IS NOT NULL OR l.ingredients IS NOT NULL OR l.video_url IS NOT NULL OR cardinality(l.image_urls) > 0) AS "hasDetails",
                    CASE WHEN CAST(:lat AS float8) IS NULL THEN NULL ELSE ST_Distance(s.location, ST_SetSRID(ST_MakePoint(CAST(:lng AS float8), CAST(:lat AS float8)), 4326)::geography) END AS "distanceM"
             FROM listings l
             JOIN sellers s ON s.id = l.seller_id

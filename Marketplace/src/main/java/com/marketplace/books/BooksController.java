@@ -44,9 +44,10 @@ public class BooksController {
 
     public record PurchaseLine(@NotNull Long productId,
                                @NotNull @DecimalMin("0.001") @DecimalMax("1000000") @Digits(integer = 9, fraction = 3) BigDecimal quantity,
-                               @NotNull @DecimalMin("0") @Digits(integer = 10, fraction = 2) BigDecimal unitCost,
-                               @DecimalMin("0.01") @Digits(integer = 10, fraction = 2) BigDecimal price,
-                               Listing.Unit unit) {}
+                               @DecimalMin("0") @Digits(integer = 10, fraction = 2) BigDecimal unitCost, // may come later, by editing the shipment
+                               @DecimalMin("0.01") @Digits(integer = 10, fraction = 2) BigDecimal price, // may come later too
+                               Listing.Unit unit,
+                               LocalDate expiresOn) {}
 
     public record PurchaseRequest(@NotEmpty @Size(max = 50) List<@Valid PurchaseLine> items,
                                   @NotNull PayMethod paymentMethod,
@@ -96,13 +97,14 @@ public class BooksController {
     @PostMapping("/purchases")
     @ResponseStatus(HttpStatus.CREATED)
     public BooksService.PurchaseView purchase(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody PurchaseRequest r) {
-        var lines = r.items().stream().map(i -> new BooksService.Line(i.productId(), i.quantity(), i.unitCost(), i.price(), i.unit())).toList();
+        var lines = r.items().stream().map(i -> new BooksService.Line(i.productId(), i.quantity(), i.unitCost(), i.price(), i.unit(), i.expiresOn())).toList();
         return books.purchase(me(jwt), lines, r.paymentMethod(), r.note());
     }
 
     public record LineEdit(@NotNull Long id,
                            @NotNull @DecimalMin("0") @DecimalMax("1000000") @Digits(integer = 9, fraction = 3) BigDecimal quantity,
-                           @NotNull @DecimalMin("0") @Digits(integer = 10, fraction = 2) BigDecimal unitCost) {}
+                           @DecimalMin("0") @Digits(integer = 10, fraction = 2) BigDecimal unitCost, // null = keep what the line has
+                           LocalDate expiresOn) {}
 
     public record PurchaseEdit(@NotNull @Size(max = 50) List<@Valid LineEdit> items,
                                @NotNull PayMethod paymentMethod,
@@ -110,7 +112,7 @@ public class BooksController {
 
     @PutMapping("/purchases/{id}")
     public BooksService.PurchaseView editPurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id, @Valid @RequestBody PurchaseEdit r) {
-        return books.editPurchase(me(jwt), id, r.items().stream().map(i -> new BooksService.LineEdit(i.id(), i.quantity(), i.unitCost())).toList(),
+        return books.editPurchase(me(jwt), id, r.items().stream().map(i -> new BooksService.LineEdit(i.id(), i.quantity(), i.unitCost(), i.expiresOn())).toList(),
                 r.paymentMethod(), r.note());
     }
 

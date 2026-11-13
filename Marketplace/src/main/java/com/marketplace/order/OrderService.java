@@ -34,7 +34,7 @@ public class OrderService {
     public record Line(Long listingId, int quantity) {}
 
     /**
-     * One transaction: reserve stock for every line, save order + items, create payment.
+     * One transaction: save the order, reserve stock for every line, save the items, create the payment.
      * Any failure (e.g. out of stock on line 3) rolls back everything, including stock of lines 1-2.
      */
     @Transactional
@@ -56,8 +56,7 @@ public class OrderService {
             if (!Objects.equals(sellerId, listing.getSellerId())) {
                 throw Errors.badRequest("all items in one order must be from the same seller");
             }
-            catalog.reserveStock(listing.getId(), line.quantity());
-
+            if (!listing.isActive() || listing.getPrice() == null) throw Errors.conflict("this offer is no longer available");
             var item = new OrderItem();
             item.setListingId(listing.getId());
             item.setQuantity(line.quantity());
@@ -83,7 +82,10 @@ public class OrderService {
         order.setCommissionAmount(commission.setScale(2, java.math.RoundingMode.HALF_UP));
         order = orders.save(order);
 
-        for (var item : toSave) item.setOrderId(order.getId());
+        for (var item : toSave) {
+            item.setOrderId(order.getId());
+            catalog.reserveStock(item.getListingId(), item.getQuantity(), order.getId(), item.getUnitPrice());
+        }
         items.saveAll(toSave);
         paymentService.createForOrder(order.getId(), method, total);
         event(order, customerId);
@@ -287,7 +289,7 @@ public class OrderService {
         switch (next) {
             case DELIVERED -> paymentService.release(order.getId());
             case CANCELLED -> {
-                items.findByOrderId(order.getId()).forEach(i -> catalog.releaseStock(i.getListingId(), i.getQuantity()));
+                items.findByOrderId(order.getId()).forEach(i -> catalog.releaseStock(i.getListingId(), i.getQuantity(), order.getId()));
                 paymentService.refund(order.getId());
             }
             default -> { }

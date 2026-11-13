@@ -56,8 +56,10 @@ export function ProductCard({ p }) {
               <span className="text-xs font-medium text-muted">from </span><span className="num">{money(p.minPrice)}</span>
             </p>
             <p className="flex items-center gap-1 text-xs text-muted">
-              <Store className="size-3.5" aria-hidden />
-              <span className="num">{p.sellerCount}</span> {p.sellerCount === 1 ? 'seller' : 'sellers'}
+              {!p.varieties && <Store className="size-3.5" aria-hidden />}
+              {p.varieties
+                ? <><span className="num">{p.varieties}</span> {p.varieties === 1 ? 'variety' : 'varieties'}</>
+                : <><span className="num">{p.sellerCount}</span> {p.sellerCount === 1 ? 'seller' : 'sellers'}</>}
             </p>
           </>
         ) : (

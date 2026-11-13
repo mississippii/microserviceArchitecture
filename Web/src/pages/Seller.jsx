@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  ArrowLeft, BookOpen, Check, ChevronDown, MoreVertical, Pencil, ReceiptText, Trash2, Users, UserRound, Banknote, Wallet, ClipboardList, ExternalLink, Inbox, LayoutDashboard, MapPin, MessageSquare, Package,
-  Copy, Minus, PackagePlus, Phone, Plus, Receipt, RefreshCw, Search, Share2, ShieldCheck, Star, Store, X,
+  ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ImagePlus, MoreVertical, Pencil, ReceiptText, Trash2, Users, UserRound, Banknote, Wallet, ClipboardList, ExternalLink, Inbox, LayoutDashboard, MapPin, MessageSquare, Package,
+  Copy, Minus, PackagePlus, Phone, Plus, Printer, Receipt, Video, RefreshCw, Search, Share2, ShieldCheck, Star, Store, X,
 } from 'lucide-react'
 import { ProductImage, Rating } from '../product-ui'
 import { Accounts, Customers, DayBook, EXPENSE, METHODS, METHOD_LABEL, SectionHead } from './Books'
-import { UNITS, api, isLoose, money, per, qty } from '../api'
+import { UNITS, api, isLoose, money, per, qty, upload } from '../api'
 import {
   Console, Drawer, Empty, ErrorMsg, Fab, Field, FormSection, Picker, LocateButton, PayBadge, Segmented, StatusBadge, StitchTrail, Success, initials, timeAgo, useLoad,
 } from '../ui'
@@ -107,20 +107,17 @@ function ShopForm({ shop, onSaved }) {
       <Field label="Address">
         <input className="input" name="street-address" autoComplete="street-address" required maxLength={300} value={form.address} onChange={set('address')} />
       </Field>
-      <fieldset>
-        <legend className="label">Shop location</legend>
-        <div className="flex flex-wrap items-start gap-2">
-          <input className="input num w-32" aria-label="Latitude" autoComplete="off" placeholder="Latitude…" type="number" step="any" min="-90" max="90" required value={form.lat} onChange={set('lat')} />
-          <input className="input num w-32" aria-label="Longitude" autoComplete="off" placeholder="Longitude…" type="number" step="any" min="-180" max="180" required value={form.lng} onChange={set('lng')} />
-          <LocateButton onPick={({ lat, lng }) => { setSaved(false); setForm({ ...form, lat, lng }) }} />
+      <fieldset className="space-y-2">
+        <legend className="sr-only">Shop location</legend>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Latitude"><input className="input num" autoComplete="off" type="number" inputMode="decimal" step="any" min="-90" max="90" required value={form.lat} onChange={set('lat')} /></Field>
+          <Field label="Longitude"><input className="input num" autoComplete="off" type="number" inputMode="decimal" step="any" min="-180" max="180" required value={form.lng} onChange={set('lng')} /></Field>
         </div>
+        <LocateButton className="btn-quiet w-full" onPick={({ lat, lng }) => { setSaved(false); setForm({ ...form, lat, lng }) }} />
         <span className="hint">Tap “Use my location” while you are at the shop.</span>
       </fieldset>
-      <Field label="Delivery">
-        <select className="input" value={form.deliveryRadiusM} onChange={set('deliveryRadiusM')}>
-          {RADII.map((m) => <option key={m} value={m}>{m / 1000} km</option>)}
-        </select>
-      </Field>
+      <Picker label="Delivery" value={String(form.deliveryRadiusM)} options={RADII.map((m) => ({ value: String(m), label: `${m / 1000} km` }))}
+              onChange={(v) => { setSaved(false); setForm({ ...form, deliveryRadiusM: v }) }} />
       <Field label="NID" hint={nidLocked ? 'Verified by our team. Contact support to correct it.' : 'Your national ID: 10, 13 or 17 digits. Only our verification team sees it.'}>
         <input className="input num" inputMode="numeric" autoComplete="off" required pattern="[0-9]{10}|[0-9]{13}|[0-9]{17}" title="10, 13 or 17 digits"
                disabled={nidLocked} value={form.nidNumber} onChange={set('nidNumber')} />
@@ -129,18 +126,15 @@ function ShopForm({ shop, onSaved }) {
       <fieldset className="space-y-3 border-t border-line pt-4">
         <legend className="float-left w-full text-sm font-semibold">How we pay you</legend>
         <p className="clear-both text-xs text-muted">Add a mobile banking number, a bank account, or both. Customers never see this.</p>
-        <div className="grid grid-cols-[110px_1fr] gap-2">
-          <Field label="Mobile banking">
-            <select className="input" value={form.mobileBankingProvider} onChange={set('mobileBankingProvider')}>
-              <option value="BKASH">bKash</option><option value="NAGAD">Nagad</option><option value="ROCKET">Rocket</option>
-            </select>
-          </Field>
+        <div className="grid grid-cols-[120px_1fr] gap-2">
+          <Picker label="Wallet" value={form.mobileBankingProvider} options={[{ value: 'BKASH', label: 'bKash' }, { value: 'NAGAD', label: 'Nagad' }, { value: 'ROCKET', label: 'Rocket' }]}
+                  onChange={(v) => { setSaved(false); setForm({ ...form, mobileBankingProvider: v }) }} />
           <Field label="Account no.">
             <input className="input num" type="tel" inputMode="numeric" autoComplete="off" placeholder="01712345678…" pattern="01[3-9][0-9]{8}" title="Bangladeshi mobile number, e.g. 01712345678"
                    required={!hasPayout} value={form.mobileBankingNumber} onChange={set('mobileBankingNumber')} />
           </Field>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2">
           <Field label="Bank name"><input className="input" autoComplete="off" maxLength={100} required={!!form.bankAccountNumber.trim()} value={form.bankName} onChange={set('bankName')} /></Field>
           <Field label="Account no."><input className="input num" inputMode="numeric" autoComplete="off" pattern="[0-9]{0,30}" title="Digits only" value={form.bankAccountNumber} onChange={set('bankAccountNumber')} /></Field>
           <Field label="Holder"><input className="input" autoComplete="off" maxLength={100} required={!!form.bankAccountNumber.trim()} value={form.bankAccountName} onChange={set('bankAccountName')} /></Field>
@@ -262,12 +256,12 @@ function Workspace({ shop, onShopChange }) {
         <ErrorMsg error="Your shop is suspended, so customers can't see your products. Finish your open orders and contact support to resolve it." />
       )}
       {tab === 'home' && <Inventory listings={listings} productById={productById} go={setTab} onSell={(l) => { setSaleMsg(null); setSelling(l) }} />}
-      {tab === 'sell' && <SalesLog sales={shopSales} orders={orders} listings={listings} done={saleMsg} onNew={() => { setSaleMsg(null); setSelling(true) }} />}
+      {tab === 'sell' && <SalesLog shop={shop} sales={shopSales} orders={orders} listings={listings} done={saleMsg} onNew={() => { setSaleMsg(null); setSelling(true) }} />}
       {selling && (
         <Counter key={selling === true ? 'new' : selling.id} preset={selling === true ? null : selling} listings={listings} productById={productById} sales={shopSales}
                  onClose={() => setSelling(false)} onDone={(msg) => { setSaleMsg(msg); setSelling(false); if (tab !== 'sell') setTab('sell') }} />
       )}
-      {tab === 'orders' && <SellerOrders orders={orders} productOfListing={productOfListing} onStockChange={listings.reload} />}
+      {tab === 'orders' && <SellerOrders shop={shop} orders={orders} productOfListing={productOfListing} onStockChange={listings.reload} />}
       {tab === 'stock' && listings.data && products.data && (
         <StockIn key={params.get('product') || ''} preset={params.get('product') || ''} products={products} listings={listings} productById={productById} />
       )}
@@ -293,7 +287,7 @@ function Workspace({ shop, onShopChange }) {
 /** Counter sale for walk-in customers: takes stock from the same products customers see online. */
 function Counter({ preset, listings, productById, sales, onClose, onDone }) {
   const [q, setQ] = useState('')
-  const [lines, setLines] = useState(preset ? [{ listingId: preset.id, quantity: 1, unitPrice: preset.price }] : []) // { listingId, quantity, unitPrice }
+  const [lines, setLines] = useState(preset ? [{ listingId: preset.id, quantity: 1, unitPrice: preset.price ?? '' }] : []) // { listingId, quantity, unitPrice }
   const [method, setMethod] = useState('CASH')
   const [channel, setChannel] = useState('OFFLINE') // walk-in by default; online = a known buyer, name and phone required
   const [buyer, setBuyer] = useState({ buyerName: '', buyerPhone: '' })
@@ -323,7 +317,7 @@ function Counter({ preset, listings, productById, sales, onClose, onDone }) {
   const add = (l) => {
     const x = inCart(l.id)
     if (x) update(l.id, { quantity: Math.min(Number(x.quantity) + 1, Number(l.stock)) })
-    else setLines([...lines, { listingId: l.id, quantity: 1, unitPrice: l.price }])
+    else setLines([...lines, { listingId: l.id, quantity: 1, unitPrice: l.price ?? '' }])
   }
 
   const submit = async (e) => {
@@ -405,7 +399,7 @@ function Counter({ preset, listings, productById, sales, onClose, onDone }) {
                       <ProductImage src={productById.get(l.productId)?.imageUrl} small className="size-9 shrink-0 rounded-md" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium">{name(l)}</span>
-                        <span className="num block text-xs text-muted">{money(l.price)}{per(l.unit)} · {Number(l.stock) === 0 ? 'Out' : `${qty(l.stock, l.unit)} left`}</span>
+                        <span className="num block text-xs text-muted">{priceText(l)} · {Number(l.stock) === 0 ? 'Out' : `${qty(l.stock, l.unit)} left`}</span>
                       </span>
                       {x ? <span className="num badge bg-ink text-white">{x.quantity}</span> : <Plus className="size-4 text-muted" aria-hidden />}
                     </button>
@@ -484,7 +478,8 @@ function Counter({ preset, listings, productById, sales, onClose, onDone }) {
 /** What the seller is about to sell: price, average cost, stock, and the shipments it came in. */
 function SellingInfo({ listing: l, product }) {
   const purchases = useLoad(() => api('/api/books/purchases'))
-  const came = (purchases.data || []).flatMap((v) => v.items.filter((i) => i.listingId === l.id).map((i) => ({ ...i, purchase: v.purchase, shipment: shipmentName(v) }))).slice(0, 3)
+  const came = (purchases.data || []).flatMap((v) => v.items.filter((i) => i.listingId === l.id).map((i) => ({ ...i, purchase: v.purchase, shipment: shipmentName(v) })))
+    .filter((i) => Number(i.remaining) > 0).reverse().slice(0, 3) // oldest first: it sells next
   const m = pct(l.costPrice, l.price)
   return (
     <section aria-label="Product" className="space-y-2 pb-3">
@@ -492,7 +487,7 @@ function SellingInfo({ listing: l, product }) {
         <ProductImage src={product?.imageUrl} className="size-16 shrink-0 rounded-lg ring-1 ring-line" />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{product?.name}</p>
-          <p className="num text-sm"><span className="font-semibold">{money(l.price)}{per(l.unit)}</span> <span className="text-muted">· {qty(l.stock, l.unit)} in stock</span></p>
+          <p className="num text-sm"><span className="font-semibold">{priceText(l)}</span> <span className="text-muted">· {qty(l.stock, l.unit)} in stock</span></p>
           <p className="num text-xs text-muted">Avg cost {l.costPrice == null ? '–' : `${money(l.costPrice)}${per(l.unit)}`}{m != null && ` · ${m}% margin`}</p>
         </div>
       </div>
@@ -501,7 +496,8 @@ function SellingInfo({ listing: l, product }) {
           {came.map((i) => (
             <li key={i.id} className="num flex items-baseline gap-2 px-3 py-1.5">
               <span className="truncate font-semibold">{i.shipment}</span>
-              <span className="ml-auto">{qty(i.quantity, i.unit)} × {money(i.unitCost)}</span>
+              {i.expiresOn && <span className={daysLeft(i.expiresOn) <= EXPIRY_SOON ? 'shrink-0 font-semibold' : 'shrink-0 text-muted'}>{expiryText(i.expiresOn)}</span>}
+              <span className="ml-auto shrink-0">{qty(i.remaining, i.unit)} left × {money(i.unitCost)}</span>
             </li>
           ))}
         </ul>
@@ -560,7 +556,7 @@ function Varieties({ title, items, productById, onSell, onRestock, onClose }) {
                 <ProductImage src={p?.imageUrl} className={`size-12 shrink-0 rounded-lg ${out ? 'grayscale' : ''}`} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{short(p?.name || `Product #${l.productId}`)}</span>
-                  <span className="num block text-sm"><span className="font-semibold">{money(l.price)}{per(l.unit)}</span>
+                  <span className="num block text-sm"><span className="font-semibold">{priceText(l)}</span>
                     <span className={out || isLow(l) ? 'font-semibold' : 'text-muted'}> · {out ? 'Out of stock' : `${qty(l.stock, l.unit)} left`}</span></span>
                 </span>
                 {!out && <span className="badge shrink-0 bg-ink text-white">Sell</span>}
@@ -575,9 +571,56 @@ function Varieties({ title, items, productById, onSell, onRestock, onClose }) {
   )
 }
 
+/** A receipt (shop sale) or invoice (online order) to print or save as PDF: only this slip goes on paper. */
+function Slip({ shop, title, number, at, buyer, address, lines, discount, total, paid, method, onClose }) {
+  const due = Number(total) - Number(paid ?? total)
+  return (
+    <Drawer title={`${title} #${number}`} onClose={onClose} footer={(
+      <button type="button" className="btn w-full" onClick={() => window.print()}><Printer className="size-4" aria-hidden /> Print</button>
+    )}>
+      <div className="print-area space-y-3 text-sm">
+        <div>
+          <p className="text-base font-semibold">{shop.shopName}</p>
+          <p className="text-xs text-muted">{shop.address}</p>
+        </div>
+        <p className="num flex justify-between gap-3 border-y border-line py-1.5 text-xs">
+          <span className="font-semibold">{title} #{number}</span><span className="text-muted">{fmtDate(at)}</span>
+        </p>
+        {(buyer || address) && (
+          <p className="text-xs">
+            {buyer && <span className="block font-medium">{buyer}</span>}
+            {address && <span className="block text-muted">{address}</span>}
+          </p>
+        )}
+        <table className="w-full">
+          <tbody className="divide-y divide-line">
+            {lines.map((l, n) => (
+              <tr key={n}>
+                <td className="py-1.5 pr-2">
+                  <span className="block font-medium">{l.name}</span>
+                  <span className="num block text-xs text-muted">{l.qty} × {money(l.unitPrice)}</span>
+                </td>
+                <td className="num py-1.5 text-right align-top font-semibold">{money(l.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <dl className="num space-y-1 border-t border-line pt-2">
+          {Number(discount) > 0 && <div className="flex justify-between text-muted"><dt>Discount</dt><dd>− {money(discount)}</dd></div>}
+          <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd>{money(total)}</dd></div>
+          {paid != null && <div className="flex justify-between text-muted"><dt>Paid · {method}</dt><dd>{money(paid)}</dd></div>}
+          {due > 0 && <div className="flex justify-between font-semibold"><dt>Due</dt><dd>{money(due)}</dd></div>}
+          {paid == null && <div className="flex justify-between text-muted"><dt>Payment</dt><dd>{method}</dd></div>}
+        </dl>
+      </div>
+    </Drawer>
+  )
+}
+
 /** Every sale, both channels: shop sales (voidable) and online orders. */
-function SalesLog({ sales, orders, listings, done, onNew }) {
+function SalesLog({ shop, sales, orders, listings, done, onNew }) {
   const [channel, setChannel] = useState('all')
+  const [slip, setSlip] = useState(null) // the shop sale whose receipt is open
   const [voiding, setVoiding] = useState(null)
   const [error, setError] = useState(null)
   const everything = [
@@ -642,6 +685,10 @@ function SalesLog({ sales, orders, listings, done, onNew }) {
             {r.status && <StatusBadge status={r.status} />}
             <span className={`num text-sm font-semibold ${r.done ? '' : 'line-through'}`}>{money(r.total)}</span>
             {r.shop && r.done && (
+              <button type="button" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-brand-50 hover:text-ink"
+                      aria-label={`Receipt for sale #${r.sale.id}`} onClick={() => setSlip(r)}><Printer className="size-4" aria-hidden /></button>
+            )}
+            {r.shop && r.done && (
               <button className="min-h-11 rounded-lg px-2 text-sm font-medium text-muted hover:bg-brand-50 hover:text-ink" disabled={voiding === r.sale.id} onClick={() => voidSale(r.sale)}>
                 {voiding === r.sale.id ? 'Voiding…' : 'Void'}
               </button>
@@ -650,14 +697,21 @@ function SalesLog({ sales, orders, listings, done, onNew }) {
         ))}
       </ul>
     </section>
+    {slip && (
+      <Slip shop={shop} title="Receipt" number={slip.sale.id} at={slip.sale.createdAt} onClose={() => setSlip(null)}
+            buyer={[slip.sale.buyerName, slip.sale.buyerPhone].filter(Boolean).join(' · ')}
+            lines={slip.items.map((i) => ({ name: i.productName, qty: qty(i.quantity, i.unit), unitPrice: i.unitPrice, amount: Number(i.quantity) * Number(i.unitPrice) }))}
+            discount={slip.sale.discount} total={slip.sale.total} paid={slip.sale.paid} method={METHOD_LABEL[slip.sale.paymentMethod]} />
+    )}
     </div>
   )
 }
 
 // ---------------------------------------------------------------- orders
 
-function SellerOrders({ orders, productOfListing, onStockChange }) {
+function SellerOrders({ shop, orders, productOfListing, onStockChange }) {
   const [filter, setFilter] = useState('open')
+  const [slip, setSlip] = useState(null) // the order whose invoice is open
   const [q, setQ] = useState('')
   const [error, setError] = useState(null)
   const [busyId, setBusyId] = useState(null)
@@ -766,21 +820,29 @@ function SellerOrders({ orders, productOfListing, onStockChange }) {
               </div>
               <div className="flex items-center justify-between gap-3 md:flex-col md:items-end md:justify-start">
                 <p className="num text-base font-semibold">{money(order.total)}<span className="block text-right text-xs font-normal text-muted">Cash on delivery</span></p>
-                {next && (
-                  <div className="flex items-center gap-1.5">
-                    {CANCELLABLE.includes(order.status) && (
-                      <button className="btn-danger" onClick={() => move(order.id, 'CANCELLED')} disabled={busyId === order.id}>Cancel</button>
-                    )}
+                <div className="flex items-center gap-1.5">
+                  <button type="button" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-brand-50 hover:text-ink"
+                          aria-label={`Invoice for order #${order.id}`} onClick={() => setSlip({ order, items, customer })}><Printer className="size-4" aria-hidden /></button>
+                  {next && CANCELLABLE.includes(order.status) && (
+                    <button className="btn-danger" onClick={() => move(order.id, 'CANCELLED')} disabled={busyId === order.id}>Cancel</button>
+                  )}
+                  {next && (
                     <button className="btn" onClick={() => move(order.id, next)} disabled={busyId === order.id}>
                       {busyId === order.id ? 'Saving…' : NEXT_LABEL[next]}
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </article>
           )
         })}
       </div>
+      {slip && (
+        <Slip shop={shop} title="Invoice" number={slip.order.id} at={slip.order.createdAt} onClose={() => setSlip(null)}
+              buyer={slip.customer && [slip.customer.name, slip.customer.phone].filter(Boolean).join(' · ')} address={slip.order.deliveryAddress}
+              lines={slip.items.map((i) => ({ name: productOfListing(i.listingId).name, qty: i.quantity, unitPrice: i.unitPrice, amount: Number(i.quantity) * Number(i.unitPrice) }))}
+              total={slip.order.total} method="Cash on delivery" />
+      )}
     </section>
   )
 }
@@ -794,6 +856,8 @@ function Inventory({ listings, productById, go, onSell }) {
   const [only, setOnly] = useState('') // one product (with all its varieties), or '' for all
   const [group, setGroup] = useState(null) // the product whose varieties are open
   const all = listings.data || []
+  const batches = useLoad(() => api('/api/listings/me/batches'), [listings.data])
+  const expiring = new Set((batches.data || []).filter((b) => b.expiresOn && daysLeft(b.expiresOn) <= EXPIRY_SOON).map((b) => b.listingId))
   const name = (l) => productById.get(l.productId)?.name || `Product #${l.productId}`
   // a variety sits under its product: হিমসাগর and ল্যাংড়া both open আম
   const parentOf = (l) => productById.get(l.productId)?.parentId ?? l.productId
@@ -838,7 +902,8 @@ function Inventory({ listings, productById, go, onSell }) {
               const stocked = g.items.filter((l) => Number(l.stock) > 0)
               const out = stocked.length === 0
               const low = !out && g.items.some(isLow)
-              const prices = g.items.map((l) => Number(l.price))
+              const exp = g.items.some((l) => expiring.has(l.id))
+              const prices = g.items.filter((l) => l.price != null).map((l) => Number(l.price))
               const unit = g.items[0].unit
               const sameUnit = g.items.every((l) => l.unit === unit)
               const total = g.items.reduce((n, l) => n + Number(l.stock), 0)
@@ -848,13 +913,13 @@ function Inventory({ listings, productById, go, onSell }) {
                           className={`block w-full overflow-hidden rounded-xl border border-line bg-white text-left ${out ? 'opacity-60' : ''}`}>
                     <span className="relative block">
                       <ProductImage src={productById.get(g.id)?.imageUrl || productById.get(g.items[0].productId)?.imageUrl} className={`aspect-[4/3] w-full ${out ? 'grayscale' : ''}`} />
-                      {(out || low) && <span className="absolute top-2 right-2 rounded bg-ink px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">{out ? 'Out' : 'Low'}</span>}
+                      {(out || exp || low) && <span className="absolute top-2 right-2 rounded bg-ink px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">{out ? 'Out' : exp ? 'Expiring' : 'Low'}</span>}
                       {g.items.length > 1 && <span className="num absolute top-2 left-2 rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-semibold">{g.items.length} varieties</span>}
                     </span>
                     <span className="block p-2">
                       <span className="block truncate text-[13px] font-semibold">{g.items.length > 1 ? groupName(g.id) : name(g.items[0])}</span>
                       <span className="mt-0.5 flex items-baseline justify-between gap-1 text-xs">
-                        <span className="num font-semibold">{money(Math.min(...prices))}{Math.max(...prices) > Math.min(...prices) && '+'}{sameUnit && per(unit)}</span>
+                        <span className="num font-semibold">{prices.length === 0 ? 'No price' : <>{money(Math.min(...prices))}{Math.max(...prices) > Math.min(...prices) && '+'}{sameUnit && per(unit)}</>}</span>
                         <span className="num truncate text-muted">{sameUnit ? qty(total, unit) : `${stocked.length} in stock`}</span>
                       </span>
                     </span>
@@ -879,7 +944,7 @@ function Inventory({ listings, productById, go, onSell }) {
               {shown.map((l) => {
                 const out = Number(l.stock) === 0
                 const low = !out && isLow(l)
-                const stockText = out ? 'Out of stock' : `${qty(l.stock, l.unit)} left`
+                const stockText = out ? 'Out of stock' : `${qty(l.stock, l.unit)} left${expiring.has(l.id) ? ' · expiring' : ''}`
                 return (
                   <tr key={l.id} className="flex items-center gap-3 px-4 py-2.5 sm:table-row sm:p-0">
                     <td className="min-w-0 flex-1 sm:px-4 sm:py-2.5">
@@ -888,17 +953,17 @@ function Inventory({ listings, productById, go, onSell }) {
                         <span className="min-w-0">
                           <span className="block truncate font-medium">{name(l)}</span>
                           <span className="block truncate text-xs text-muted">
-                            <span className="num font-semibold text-ink sm:hidden">{money(l.price)}{per(l.unit)} · </span>
-                            <span className={`sm:hidden ${out || low ? 'font-semibold text-ink' : ''}`}>{stockText}</span>
+                            <span className="num font-semibold text-ink sm:hidden">{priceText(l)} · </span>
+                            <span className={`sm:hidden ${out || low || expiring.has(l.id) ? 'font-semibold text-ink' : ''}`}>{stockText}</span>
                             {!l.active && ' · Shop only'}
                           </span>
                         </span>
                       </button>
                     </td>
                     <td className="num hidden text-muted sm:table-cell sm:px-4 sm:py-2.5 sm:text-right">{l.costPrice == null ? '–' : `${money(l.costPrice)}${per(l.unit)}`}</td>
-                    <td className="num hidden font-semibold sm:table-cell sm:px-4 sm:py-2.5 sm:text-right">{money(l.price)}{per(l.unit)}</td>
+                    <td className="num hidden font-semibold sm:table-cell sm:px-4 sm:py-2.5 sm:text-right">{priceText(l)}</td>
                     <td className="num hidden sm:table-cell sm:px-4 sm:py-2.5 sm:text-right">
-                      <span className={out || low ? 'font-semibold' : ''}>{stockText}</span>
+                      <span className={out || low || expiring.has(l.id) ? 'font-semibold' : ''}>{stockText}</span>
                       {low && <span className="ml-1.5 inline-block size-2 rounded-full bg-ink align-middle" aria-label="low stock" />}
                     </td>
                     <td className="sm:px-2 sm:py-2.5">
@@ -924,13 +989,29 @@ function Inventory({ listings, productById, go, onSell }) {
 
 // ---------------------------------------------------------------- stock
 
-const UNIT_NAMES = { PCS: 'Piece', KG: 'Kilogram', LITRE: 'Litre', DOZEN: 'Dozen', BOX: 'Box', CRATE: 'Crate', BAG: 'Bag', PACK: 'Pack' }
+const UNIT_NAMES = { PCS: 'Piece', KG: 'KG', LITRE: 'Litre', DOZEN: 'Dozen', BOX: 'Box', CRATE: 'Crate', BAG: 'Bag', PACK: 'Pack' }
 const fmtDate = (iso) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 /** A shipment's name: its product and the day it came, e.g. আম_11_Nov; two products: আম+লিচু_11_Nov. */
 const shipmentName = (v) => {
   const names = [...new Set(v.items.map((i) => i.productName.split(' - ')[0]))]
   const d = new Date(v.purchase.createdAt)
   return `${names.join('+') || 'Shipment'}_${d.getDate()}_${d.toLocaleDateString('en-GB', { month: 'short' })}`
+}
+/** Expiry dates are plain days (2026-11-16). */
+const dayOf = (iso) => new Date(`${iso}T00:00`)
+const daysLeft = (iso) => Math.round((dayOf(iso) - new Date(new Date().toDateString())) / 86400000)
+const expiryText = (iso) => {
+  const d = daysLeft(iso)
+  const day = dayOf(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  return d < 0 ? `Expired ${day}` : d === 0 ? 'Expires today' : `Expires ${day}`
+}
+const EXPIRY_SOON = 3 // days; the same lead the morning alert uses
+/** A product received without a price isn't on sale yet. */
+const priceText = (l) => (l.price == null ? 'No price' : `${money(l.price)}${per(l.unit)}`)
+/** A shipment is one product, so it shows that product's photo; its varieties (হিমসাগর, ল্যাংড়া) are the same আম. */
+const shipmentImage = (v, productById) => {
+  const p = productById.get(v.items[0]?.productId)
+  return productById.get(p?.parentId)?.imageUrl || p?.imageUrl || v.items[0]?.imageUrl
 }
 const varietyOf = (name) => name.split(' - ').slice(1).join(' - ')
 const fmtDay = (iso) => new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
@@ -980,7 +1061,7 @@ function StockIn({ products, listings, productById, preset }) {
   if (open) {
     return (
       <>
-        <ShipmentDetail view={open} onBack={closeShipment} onEdit={() => setEditing(open)} onDelete={() => deletePurchase(open)} onChanged={reloadAll} />
+        <ShipmentDetail view={open} listings={listings.data || []} productById={productById} onBack={closeShipment} onEdit={() => setEditing(open)} onDelete={() => deletePurchase(open)} onChanged={reloadAll} />
         {editing && <PurchaseEdit view={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); reloadAll() }} />}
       </>
     )
@@ -997,7 +1078,7 @@ function StockIn({ products, listings, productById, preset }) {
       <Success>{saved}</Success>
       <ErrorMsg error={error} />
 
-      <ShipmentList purchases={purchases} onOpen={(v) => { setSaved(null); openShipment(v.purchase.id) }} />
+      <ShipmentList purchases={purchases} productById={productById} onOpen={(v) => { setSaved(null); openShipment(v.purchase.id) }} />
 
       {entry && (
         <StockEntry key={`${entry.pid}-${entry.mode}`} products={products} listings={listings} productById={productById} categories={categories}
@@ -1020,127 +1101,204 @@ function StockIn({ products, listings, productById, preset }) {
 }
 
 /**
- * A new shipment: pick the product, then one line per variety received (হিমসাগর 20 kg, ল্যাংড়া 15 kg…), each with its cost and selling price.
- * It is saved as one purchase; a new selling price on a product already in the shop is applied after.
+ * A new shipment of one product (as CBTrading's shipment form): pick the product, then add its varieties one at a time
+ * with "+ Add" (হিমসাগর 20 kg, ল্যাংড়া 15 kg…). Only the quantity is needed; cost, price, expiry and photos can wait
+ * and are filled in from the shipment's page. Saved as one purchase.
  */
 function ReceiveShipment({ products, listings, categories, onRequest, onClose, onSaved }) {
   const [cat, setCat] = useState('')
   const [base, setBase] = useState('')
-  const [lines, setLines] = useState([])
+  const [lines, setLines] = useState([]) // what "+ Add" has put in the shipment
+  const [d, setD] = useState(null) // the line being typed
+  const [editing, setEditing] = useState(null) // { at, draft }: a line taken back from Items to change; draft = what was being typed before
   const [method, setMethod] = useState('CASH')
   const [note, setNote] = useState('')
   const [error, setError] = useState(null)
+  const [addError, setAddError] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [sending, setSending] = useState(false) // a photo or video is uploading
   const mine = (id) => listings.find((l) => String(l.productId) === String(id))
   const withProducts = new Set(products.map((p) => p.categoryId))
   const cats = (categories.data || []).filter((c) => withProducts.has(c.id)).sort((a, b) => a.name.localeCompare(b.name))
   const inCat = products.filter((p) => String(p.categoryId) === cat && !p.parentId)
   const baseP = products.find((p) => String(p.id) === base)
   const varieties = products.filter((p) => String(p.parentId) === base)
-  const short = (p) => (baseP && p.name.startsWith(`${baseP.name} - `) ? p.name.slice(baseP.name.length + 3) : p.name)
-  const line = (id) => { const l = mine(id); return { key: Math.random(), productId: String(id), qty: '', unit: l?.unit || 'KG', cost: '', price: l ? String(Number(l.price)) : '' } }
-  const choose = (v) => { setBase(v); const vs = products.filter((p) => String(p.parentId) === v); setLines([line(vs.length ? vs[0].id : v)]) }
-  const unused = varieties.filter((p) => !lines.some((x) => x.productId === String(p.id)))
-  const update = (key, patch) => setLines(lines.map((x) => (x.key === key ? { ...x, ...patch } : x)))
+  const detailsKey = (x) => JSON.stringify([x.description.trim(), x.ingredients.trim(), x.imageUrls, x.videoUrl])
+  const nameOf = (id) => { const p = products.find((x) => String(x.id) === String(id)); return !p ? '' : baseP && p.name.startsWith(`${baseP.name} - `) ? p.name.slice(baseP.name.length + 3) : p.name }
+  const line = (id) => { const l = mine(id); return { key: Math.random(), productId: String(id), qty: '', unit: l?.unit || 'KG', recv: l?.unit || 'KG', pack: '', cost: '', price: l?.price != null ? String(Number(l.price)) : '', expiry: '', ...detailsOf(l) } }
+  const reopen = (x) => { // change a line already in Items
+    setEditing({ at: lines.indexOf(x), draft: d })
+    setLines(lines.filter((y) => y !== x))
+    setD(x)
+    setAddError(null)
+  }
+  const choose = (v) => { setBase(v); setLines([]); setEditing(null); setAddError(null); const vs = products.filter((p) => String(p.parentId) === v); setD(line(vs.length ? vs[0].id : v)) }
+  const locked = (x) => { const l = mine(x.productId); return !!l && Number(l.stock) !== 0 } // counted in its unit already
+  const patch = (change) => { setD({ ...d, ...change }); setAddError(null) }
+  // The next variety keeps the units already chosen (a whole shipment of crates is typed once), and the typed
+  // qty/cost when only the variety changed. A variety already counted in the shop keeps its own sell unit.
+  const carry = (n, from, fresh) => ({ ...n, ...(fresh ? {} : { qty: from.qty, cost: from.cost, expiry: from.expiry }),
+    recv: from.recv, ...(locked(n) ? {} : { unit: from.unit, pack: from.pack }) })
+  // Received by the crate, sold by the kg: everything is stored in the sell unit.
+  const factor = (x) => (x.recv === x.unit ? 1 : Number(x.pack || 0))
+  const sellQty = (x) => Math.round(Number(x.qty || 0) * factor(x) * 1000) / 1000
+  const sellCost = (x) => (x.cost === '' || !factor(x) ? null : Math.round((Number(x.cost) / factor(x)) * 100) / 100)
   const total = lines.reduce((n, x) => n + Number(x.qty || 0) * Number(x.cost || 0), 0)
+  const problem = (x) => (!(Number(x.qty) > 0) ? 'Enter the quantity.'
+    : x.recv !== x.unit && !(Number(x.pack) > 0) ? `Enter how many ${UNITS[x.unit][1]} are in one ${UNITS[x.recv][0]}.` : null)
+
+  const add = () => {
+    const why = problem(d)
+    if (why) return setAddError(why)
+    if (editing) { // back into its place in the list; the typing that was interrupted comes back
+      const next = [...lines]
+      next.splice(editing.at, 0, d)
+      const draft = editing.draft && !next.some((x) => x.productId === editing.draft.productId) ? editing.draft : null
+      const left = varieties.filter((p) => !next.some((x) => x.productId === String(p.id)))
+      setLines(next)
+      setEditing(null)
+      setAddError(null)
+      setD(draft || (left.length ? carry(line(left[0].id), d, true) : null))
+      return
+    }
+    const next = [...lines, d]
+    const left = varieties.filter((p) => !next.some((x) => x.productId === String(p.id)))
+    setLines(next)
+    setAddError(null)
+    // the next variety starts with the same units, so a whole shipment in crates is typed once
+    setD(left.length ? carry(line(left[0].id), d, true) : null)
+  }
 
   const submit = async (e) => {
     e.preventDefault()
     setError(null)
+    // a line typed but not added yet still counts
+    const typed = d && d.qty !== ''
+    if (typed && problem(d)) return setAddError(problem(d))
+    const all = typed ? [...lines, d] : lines
+    if (!all.length) return setAddError('Enter the quantity.')
     setBusy(true)
     try {
       const res = await api('/api/books/purchases', {
         method: 'POST',
         body: {
           paymentMethod: method, note: note.trim() || null,
-          items: lines.map((x) => ({ productId: Number(x.productId), quantity: Number(x.qty), unitCost: Number(x.cost), price: Number(x.price), unit: x.unit })),
+          items: all.map((x) => ({ productId: Number(x.productId), quantity: sellQty(x), unitCost: sellCost(x), price: x.price === '' ? null : Number(x.price), unit: x.unit, expiresOn: x.expiry || null })),
         },
       })
       // products already in the shop keep their old price unless it was changed here
-      const changed = res.items.filter((i) => { const x = lines.find((y) => Number(y.productId) === i.productId); return x && Number(x.price) !== Number(i.price) })
+      const changed = res.items.filter((i) => { const x = all.find((y) => Number(y.productId) === i.productId); return x && x.price !== '' && Number(x.price) !== Number(i.price) })
       if (changed.length) {
         await api(`/api/books/purchases/${res.purchase.id}/prices`, {
-          method: 'PUT', body: changed.map((i) => ({ listingId: i.listingId, price: Number(lines.find((y) => Number(y.productId) === i.productId).price) })),
+          method: 'PUT', body: changed.map((i) => ({ listingId: i.listingId, price: Number(all.find((y) => Number(y.productId) === i.productId).price) })),
         })
+      }
+      for (const x of all) {
+        const i = res.items.find((y) => y.productId === Number(x.productId))
+        if (i && detailsKey(x) !== detailsKey(detailsOf(mine(x.productId)))) {
+          await api(`/api/listings/${i.listingId}/details`, { method: 'PUT', body: {
+            description: x.description, ingredients: x.ingredients, imageUrls: x.imageUrls, videoUrl: x.videoUrl || null } })
+        }
       }
       onSaved(res.purchase.id)
     } catch (err) { setError(err); setBusy(false) }
   }
 
+  const repack = d && d.recv !== d.unit
+  const m = d && pct(sellCost(d), d.price)
+  const units = Object.entries(UNIT_NAMES).map(([value, label]) => ({ value, label }))
   return (
     <Drawer wide title="Receive stock" onClose={onClose} footer={(
       <div className="space-y-2">
-        {lines.length > 0 && (
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm text-muted">{lines.length} {lines.length === 1 ? 'item' : 'items'}</span>
-            <span className="num text-xl font-semibold">{money(total)}</span>
-          </div>
-        )}
         <ErrorMsg error={error} />
-        <button form="receive-form" className="btn w-full" disabled={busy || lines.length === 0}>{busy ? 'Saving…' : 'Receive'}</button>
+        <button form="receive-form" className="btn w-full" disabled={busy || sending || !base}>{busy ? 'Saving…' : 'Receive'}</button>
       </div>
     )}>
       <form id="receive-form" onSubmit={submit} className="divide-y divide-line" aria-label="Receive stock">
         <FormSection icon={Package} title="Product">
           <div className="grid grid-cols-2 gap-2">
             <Picker label="Group" required value={cat} options={cats.map((c) => ({ value: String(c.id), label: c.name }))}
-                    onChange={(v) => { setCat(v); setBase(''); setLines([]) }} />
+                    onChange={(v) => { setCat(v); setBase(''); setLines([]); setD(null) }} />
             <Picker label="Product" required disabled={!cat} value={base} options={inCat.map((p) => ({ value: String(p.id), label: p.name }))} onChange={choose} />
           </div>
           <button type="button" className="-mt-1 min-h-9 text-xs font-medium text-muted underline underline-offset-2 hover:text-ink" onClick={onRequest}>Product missing? Request it</button>
         </FormSection>
 
-        {lines.length > 0 && (
-          <FormSection icon={PackagePlus} title={varieties.length ? 'Varieties' : 'Received'}>
-            <ul className="space-y-3">
-              {lines.map((x, n) => {
-                const l = mine(x.productId)
-                const m = pct(x.cost === '' ? null : x.cost, x.price)
-                return (
-                  <li key={x.key} className="space-y-2 rounded-lg p-2.5 ring-1 ring-line">
-                    {varieties.length > 0 && (
-                      <div className="flex items-end gap-1">
-                        <div className="min-w-0 flex-1">
-                          <Picker label={`Variety ${n + 1}`} required value={x.productId} onChange={(v) => update(x.key, { ...line(v), key: x.key, qty: x.qty, cost: x.cost })}
-                                  options={varieties.filter((p) => String(p.id) === x.productId || !lines.some((y) => y.productId === String(p.id)))
-                                    .map((p) => ({ value: String(p.id), label: short(p), hint: mine(p.id) ? qty(mine(p.id).stock, mine(p.id).unit) : '' }))} />
-                        </div>
-                        {lines.length > 1 && (
-                          <button type="button" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-brand-50 hover:text-ink"
-                                  aria-label={`Remove variety ${n + 1}`} onClick={() => setLines(lines.filter((y) => y !== x))}><X className="size-4" aria-hidden /></button>
-                        )}
-                      </div>
-                    )}
-                    <div className="grid grid-cols-2 gap-2">
-                      <Field label="Qty" suffix={UNITS[x.unit][1]}>
-                        <input className="input num" type="number" inputMode="decimal" placeholder="0" min={isLoose(x.unit) ? '0.001' : '1'} step={isLoose(x.unit) ? '0.001' : '1'} required
-                               value={x.qty} onChange={(e) => update(x.key, { qty: e.target.value })} />
-                      </Field>
-                      <Picker label="Unit" value={x.unit} disabled={!!l && Number(l.stock) !== 0} onChange={(v) => update(x.key, { unit: v })}
-                              options={Object.entries(UNIT_NAMES).map(([value, label]) => ({ value, label }))} />
-                      <Field label="Cost" prefix="৳" suffix={per(x.unit)}>
-                        <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step="0.01" required value={x.cost} onChange={(e) => update(x.key, { cost: e.target.value })} />
-                      </Field>
-                      <Field label="Price" prefix="৳" suffix={per(x.unit)}>
-                        <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0.01" step="0.01" required value={x.price} onChange={(e) => update(x.key, { price: e.target.value })} />
-                      </Field>
-                    </div>
-                    {(Number(x.qty) > 0 && x.cost !== '') && (
-                      <p className="num text-xs text-muted">{money(Number(x.qty) * Number(x.cost))}{m != null && <> · <span className={m < 0 ? 'font-semibold text-ink' : ''}>{m}% margin</span></>}</p>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            {unused.length > 0 && (
-              <button type="button" className="btn-quiet w-full border-dashed" onClick={() => setLines([...lines, line(unused[0].id)])}>
-                <Plus className="size-4" aria-hidden /> Add variety
-              </button>
+        {d && (
+          <FormSection icon={PackagePlus} title={editing ? 'Change item' : 'Add items'}>
+            {varieties.length > 0 && (
+              <Picker label="Variety" value={d.productId} onChange={(v) => { setD(carry(line(v), d)); setAddError(null) }}
+                      options={varieties.filter((p) => !lines.some((y) => y.productId === String(p.id)))
+                        .map((p) => ({ value: String(p.id), label: nameOf(p.id), hint: mine(p.id) ? qty(mine(p.id).stock, mine(p.id).unit) : '' }))} />
             )}
+            <div className="flex items-end gap-2">
+              <div className="min-w-0 flex-1">
+                <Picker label="Unit" value={d.recv} options={units} onChange={(v) => patch(locked(d) || d.recv !== d.unit ? { recv: v } : { recv: v, unit: v })} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <Field label="Qty" suffix={UNITS[d.recv][1]}>
+                  <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step={isLoose(d.recv) ? '0.001' : '1'}
+                         value={d.qty} onChange={(e) => patch({ qty: e.target.value })} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add() } }} />
+                </Field>
+              </div>
+              <button type="button" className="btn shrink-0" disabled={sending} onClick={add}>{editing ? <><Check className="size-4" aria-hidden /> Update</> : <><Plus className="size-4" aria-hidden /> Add</>}</button>
+            </div>
+            {repack && (
+              <Field label={`${UNITS[d.unit][0]} per ${UNITS[d.recv][0]}`} suffix={UNITS[d.unit][0]}>
+                <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step={isLoose(d.unit) ? '0.001' : '1'} value={d.pack} onChange={(e) => patch({ pack: e.target.value })} />
+              </Field>
+            )}
+            <details open={d.cost !== '' || d.expiry !== '' || d.imageUrls.length > 0 || !!d.videoUrl || !!d.description || !!d.ingredients || undefined}>
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 text-sm font-medium [&::-webkit-details-marker]:hidden">Price, photos and more <ChevronDown className="size-4 text-muted" aria-hidden /></summary>
+              <div className="mt-1 grid grid-cols-2 gap-2">
+                <Field label="Cost" prefix="৳" suffix={per(d.recv)}>
+                  <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step="0.01" value={d.cost} onChange={(e) => patch({ cost: e.target.value })} />
+                </Field>
+                <Picker label="Sell unit" value={d.unit} disabled={locked(d)} options={units} onChange={(v) => patch({ unit: v })} />
+                <Field label="Price" prefix="৳" suffix={per(d.unit)}>
+                  <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0.01" step="0.01" value={d.price} onChange={(e) => patch({ price: e.target.value })} />
+                </Field>
+                <div className="col-span-2">
+                  <Field label="Expiry"><input className="input num" type="date" value={d.expiry} onChange={(e) => patch({ expiry: e.target.value })} /></Field>
+                </div>
+              </div>
+              {m != null && <p className={`num mt-1 text-xs ${m < 0 ? 'font-semibold' : 'text-muted'}`}>{m}% margin</p>}
+              <div className="mt-3 space-y-3">
+                <DetailsFields value={d} onChange={(v) => { setD(v); setAddError(null) }} onBusy={setSending} onError={setAddError} />
+              </div>
+            </details>
+            <ErrorMsg error={addError} />
           </FormSection>
         )}
 
         {lines.length > 0 && (
+          <FormSection icon={ClipboardList} title="Items" aside={<span className="num text-sm text-muted">{lines.length}{total > 0 && ` · ${money(total)}`}</span>}>
+            <ul className="divide-y divide-line rounded-lg ring-1 ring-line">
+              {lines.map((x) => (
+                <li key={x.key} className="flex items-center gap-1 pr-1">
+                  <button type="button" onClick={() => reopen(x)} aria-label={`Change ${nameOf(x.productId)}`}
+                          className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-lg py-1 pl-3 text-left hover:bg-brand-50">
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{nameOf(x.productId)}</span>
+                      {(() => {
+                        const said = [x.cost !== '' && `cost ${money(x.cost)}${per(x.recv)}`, x.price !== '' && `sell ${money(x.price)}${per(x.unit)}`, x.expiry && expiryText(x.expiry),
+                          x.imageUrls.length > 0 && `${x.imageUrls.length} ${x.imageUrls.length === 1 ? 'photo' : 'photos'}`, x.videoUrl && 'video'].filter(Boolean)
+                        return said.length > 0 && <span className="num block truncate text-xs text-muted">{said.join(' · ')}</span>
+                      })()}
+                    </span>
+                    <span className="num shrink-0 text-sm font-semibold">{qty(x.qty, x.recv)}</span>
+                    <Pencil className="size-3.5 shrink-0 text-muted" aria-hidden />
+                  </button>
+                  <button type="button" className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-brand-50 hover:text-ink"
+                          aria-label={`Remove ${nameOf(x.productId)}`}
+                          onClick={() => { setLines(lines.filter((y) => y !== x)); if (!d) setD({ ...line(x.productId), recv: x.recv, unit: x.unit, pack: x.pack }) }}><X className="size-4" aria-hidden /></button>
+                </li>
+              ))}
+            </ul>
+          </FormSection>
+        )}
+
+        {[...lines, ...(d ? [d] : [])].some((x) => x.cost !== '') && (
           <FormSection icon={Banknote} title="Payment">
             <div className="grid grid-cols-2 gap-2">
               <Picker label="Paid by" value={method} onChange={setMethod} options={METHODS.map(([value, label]) => ({ value, label }))} />
@@ -1153,8 +1311,16 @@ function ReceiveShipment({ products, listings, categories, onRequest, onClose, o
   )
 }
 
+/** How much of a shipment's goods customers have bought, by cost. Oldest goods sell first. */
+const soldShare = (v) => {
+  const w = v.items.every((i) => i.unitCost != null) ? (i) => Number(i.unitCost) : () => 1 // by quantity while a cost is missing
+  const bought = v.items.reduce((n, i) => n + Number(i.quantity) * w(i), 0)
+  const sold = v.items.reduce((n, i) => n + Math.min(Number(i.sold), Number(i.quantity)) * w(i), 0)
+  return bought ? Math.round((sold / bought) * 100) : 0
+}
+
 /** Every shipment of stock as a photo tile, newest first; a tap opens it. */
-function ShipmentList({ purchases, onOpen }) {
+function ShipmentList({ purchases, productById, onOpen }) {
   return (
     <div className="space-y-3">
       <ErrorMsg error={purchases.error} />
@@ -1162,17 +1328,20 @@ function ShipmentList({ purchases, onOpen }) {
       <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
         {(purchases.data || []).map((v) => {
           const costs = v.costs.reduce((n, c) => n + Number(c.amount), 0)
+          const sold = soldShare(v)
           return (
             <li key={v.purchase.id}>
               <button type="button" onClick={() => onOpen(v)} className="block w-full overflow-hidden rounded-xl bg-white text-left ring-1 ring-line transition-shadow hover:shadow-[0_6px_20px_rgb(0_0_0/0.10)]">
                 <span className="relative block aspect-[4/3] bg-white">
-                  <ProductImage src={v.items[0]?.imageUrl} className="size-full" />
-                  {v.items.length > 1 && <span className="badge num absolute top-2 right-2 bg-ink text-white">+{v.items.length - 1}</span>}
+                  <ProductImage src={shipmentImage(v, productById)} className="size-full" />
                 </span>
                 <span className="block border-t border-line p-2.5">
                   <span className="block truncate text-sm font-medium">{shipmentName(v)}</span>
                   <span className="block truncate text-xs text-muted">{v.items.map((i) => varietyOf(i.productName) || qty(i.quantity, i.unit)).join(', ')}</span>
-                  <span className="num mt-1 block text-[15px] font-semibold">{money(Number(v.purchase.total) + costs)}</span>
+                  <span className="num mt-1 flex items-baseline justify-between gap-2">
+                    <span className="text-[15px] font-semibold">{money(Number(v.purchase.total) + costs)}</span>
+                    <span className="text-xs text-muted">{sold}% sold</span>
+                  </span>
                 </span>
               </button>
             </li>
@@ -1184,19 +1353,21 @@ function ShipmentList({ purchases, onOpen }) {
 }
 
 /** One shipment: what it cost with its extra costs, what it is worth at today's prices, and everything that can change it. */
-function ShipmentDetail({ view: v, onBack, onEdit, onDelete, onChanged }) {
+function ShipmentDetail({ view: v, listings, productById, onBack, onEdit, onDelete, onChanged }) {
   const [sheet, setSheet] = useState(null) // 'menu' | 'cost' | 'prices'
+  const [item, setItem] = useState(null) // the product line being filled in
   const goods = Number(v.purchase.total)
   const extra = v.costs.reduce((n, c) => n + Number(c.amount), 0)
   const worth = v.items.reduce((n, i) => n + Number(i.quantity) * Number(i.price), 0)
+  const sales = v.items.reduce((n, i) => n + Number(i.revenue), 0)
+  // what its sold goods earned over what they cost, less the shipment's own extra costs
+  const profit = sales - v.items.reduce((n, i) => n + Number(i.sold) * Number(i.unitCost), 0) - extra
 
   return (
     <section aria-labelledby="shipment-title" className="space-y-4">
       {/* the goods' photos fill the header; the shipment's name and bill sit on a dark band over them */}
       <header className="relative h-52 bg-white ring-line max-sm:-mx-3 sm:h-60 sm:rounded-xl sm:ring-1">
-        <div className="flex size-full overflow-hidden sm:rounded-xl">
-          {v.items.slice(0, 3).map((i) => <ProductImage key={i.id} src={i.imageUrl} loading="eager" className="h-full min-w-0 flex-1" />)}
-        </div>
+        <ProductImage src={shipmentImage(v, productById)} loading="eager" className="size-full sm:rounded-xl" />
         <button type="button" onClick={onBack} aria-label="Back to shipments"
                 className="absolute top-2 left-2 inline-flex size-11 items-center justify-center rounded-full bg-white/95 shadow-[0_1px_4px_rgb(0_0_0/0.2)] hover:bg-white">
           <ArrowLeft className="size-5" aria-hidden />
@@ -1205,7 +1376,6 @@ function ShipmentDetail({ view: v, onBack, onEdit, onDelete, onChanged }) {
                 className="absolute top-2 right-2 inline-flex size-11 items-center justify-center rounded-full bg-white/95 shadow-[0_1px_4px_rgb(0_0_0/0.2)] hover:bg-white">
           <MoreVertical className="size-5" aria-hidden />
         </button>
-        {v.items.length > 3 && <span className="badge num absolute top-3 right-16 bg-ink text-white">+{v.items.length - 3}</span>}
         {sheet === 'menu' && (
           <>
             <button type="button" className="fixed inset-0 z-20 cursor-default" aria-label="Close menu" tabIndex={-1} onClick={() => setSheet(null)} />
@@ -1233,10 +1403,10 @@ function ShipmentDetail({ view: v, onBack, onEdit, onDelete, onChanged }) {
       </header>
       <div className="space-y-4">
         <dl className="grid grid-cols-2 gap-2">
-          {[['Goods', goods], ['Extra costs', extra], ['Total cost', goods + extra], ['Worth at price', worth]].map(([k, n]) => (
-            <div key={k} className="rounded-lg bg-white px-3 py-2 ring-1 ring-line">
+          {[['Goods', goods], ['Extra costs', extra], ['Total cost', goods + extra], ['Worth at price', worth], ['Sold', `${soldShare(v)}%`], ['Sales', sales], ['Profit so far', profit]].map(([k, n]) => (
+            <div key={k} className="rounded-lg bg-white px-3 py-2 ring-1 ring-line last:col-span-2">
               <dt className="text-xs text-muted">{k}</dt>
-              <dd className="num text-[15px] font-semibold">{money(n)}</dd>
+              <dd className="num text-[15px] font-semibold">{typeof n === 'string' ? n : money(n)}</dd>
             </div>
           ))}
         </dl>
@@ -1247,14 +1417,18 @@ function ShipmentDetail({ view: v, onBack, onEdit, onDelete, onChanged }) {
             {v.items.map((i) => {
               const m = pct(i.unitCost, i.price)
               return (
-                <li key={i.id} className="flex items-center gap-3 p-2.5">
-                  <ProductImage src={i.imageUrl} small className="size-11 shrink-0 rounded-lg" />
+                <li key={i.id}>
+                 <button type="button" onClick={() => setItem(i)} aria-label={`Edit ${i.productName}`} className="flex w-full items-center gap-3 p-2.5 text-left hover:bg-brand-50">
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{i.productName}</span>
-                    <span className="num block truncate text-xs text-muted">{qty(i.quantity, i.unit)} × {money(i.unitCost)} · sell {money(i.price)}{per(i.unit)}{m != null && ` · ${m}%`}</span>
-                    <span className="num block text-xs text-muted">{qty(i.stock, i.unit)} in stock now</span>
+                    <span className="block truncate text-sm font-medium">{varietyOf(i.productName) || i.productName}</span>
+                    <span className="num block truncate text-xs text-muted">{qty(i.quantity, i.unit)}{i.unitCost != null && ` × ${money(i.unitCost)}`}{i.price != null && ` · sell ${money(i.price)}${per(i.unit)}`}{m != null && ` · ${m}%`}</span>
+                    {(i.unitCost == null || i.price == null) && <span className="block text-xs font-semibold">{[i.unitCost == null && 'Add cost', i.price == null && 'Add price'].filter(Boolean).join(' · ')}</span>}
+                    <span className="num block text-xs text-muted">{qty(i.remaining, i.unit)} left · {qty(i.sold, i.unit)} sold</span>
+                    {i.expiresOn && <span className={`num block text-xs ${Number(i.remaining) > 0 && daysLeft(i.expiresOn) <= EXPIRY_SOON ? 'font-semibold' : 'text-muted'}`}>{expiryText(i.expiresOn)}</span>}
                   </span>
-                  <span className="num shrink-0 text-sm font-semibold">{money(Number(i.quantity) * Number(i.unitCost))}</span>
+                  {i.unitCost != null && <span className="num shrink-0 text-sm font-semibold">{money(Number(i.quantity) * Number(i.unitCost))}</span>}
+                  <ChevronRight className="size-4 shrink-0 text-muted" aria-hidden />
+                 </button>
                 </li>
               )
             })}
@@ -1262,6 +1436,7 @@ function ShipmentDetail({ view: v, onBack, onEdit, onDelete, onChanged }) {
         </section>
 
       </div>
+      {item && <ShipmentProduct view={v} item={item} listing={listings.find((l) => l.id === item.listingId)} onClose={() => setItem(null)} onSaved={() => { setItem(null); onChanged() }} />}
       {sheet === 'cost' && <ShipmentCost view={v} onClose={() => setSheet(null)} onSaved={() => { setSheet(null); onChanged() }} />}
       {sheet === 'prices' && <ShipmentPrices view={v} onClose={() => setSheet(null)} onSaved={() => { setSheet(null); onChanged() }} />}
     </section>
@@ -1310,7 +1485,7 @@ function ShipmentCost({ view, onClose, onSaved }) {
 
 /** New selling prices for the shipment's products, with the margin on what this shipment cost. */
 function ShipmentPrices({ view, onClose, onSaved }) {
-  const [prices, setPrices] = useState(() => Object.fromEntries(view.items.map((i) => [i.listingId, String(Number(i.price))])))
+  const [prices, setPrices] = useState(() => Object.fromEntries(view.items.map((i) => [i.listingId, i.price == null ? '' : String(Number(i.price))])))
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
   const items = view.items.filter((i, n, all) => all.findIndex((x) => x.listingId === i.listingId) === n)
@@ -1338,7 +1513,7 @@ function ShipmentPrices({ view, onClose, onSaved }) {
               <ProductImage src={i.imageUrl} small className="mb-0.5 size-11 shrink-0 rounded-lg" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{i.productName}</p>
-                <p className="num text-xs text-muted">cost {money(i.unitCost)}{per(i.unit)}{m != null && <> · <span className={m < 0 ? 'font-semibold text-ink' : ''}>{m}% margin</span></>}</p>
+                <p className="num text-xs text-muted">{i.unitCost == null ? 'No cost' : `cost ${money(i.unitCost)}${per(i.unit)}`}{m != null && <> · <span className={m < 0 ? 'font-semibold text-ink' : ''}>{m}% margin</span></>}</p>
               </div>
               <div className="w-36 shrink-0">
                 <Field label="Price" prefix="৳" suffix={per(i.unit)}>
@@ -1355,7 +1530,7 @@ function ShipmentPrices({ view, onClose, onSaved }) {
 
 /** Change what a purchase says: quantities, costs, how it was paid. Stock and average cost follow. */
 function PurchaseEdit({ view, onClose, onSaved }) {
-  const [lines, setLines] = useState(view.items.map((i) => ({ ...i, quantity: String(Number(i.quantity)), unitCost: String(Number(i.unitCost)) })))
+  const [lines, setLines] = useState(view.items.map((i) => ({ ...i, quantity: String(Number(i.quantity)), unitCost: i.unitCost == null ? '' : String(Number(i.unitCost)), expiresOn: i.expiresOn || '' })))
   const [method, setMethod] = useState(view.purchase.paymentMethod)
   const [note, setNote] = useState(view.purchase.note || '')
   const [error, setError] = useState(null)
@@ -1369,7 +1544,7 @@ function PurchaseEdit({ view, onClose, onSaved }) {
     try {
       await api(`/api/books/purchases/${view.purchase.id}`, {
         method: 'PUT',
-        body: { paymentMethod: method, note: note.trim() || null, items: lines.map((i) => ({ id: i.id, quantity: Number(i.quantity), unitCost: Number(i.unitCost) })) },
+        body: { paymentMethod: method, note: note.trim() || null, items: lines.map((i) => ({ id: i.id, quantity: Number(i.quantity), unitCost: i.unitCost === '' ? null : Number(i.unitCost), expiresOn: i.expiresOn || null })) },
       })
       onSaved()
     } catch (err) { setError(err) } finally { setBusy(false) }
@@ -1392,8 +1567,11 @@ function PurchaseEdit({ view, onClose, onSaved }) {
                   <input className="input num" type="number" inputMode="decimal" min="0" step={isLoose(i.unit) ? '0.001' : '1'} required value={i.quantity} onChange={(e) => set(i.id, 'quantity', e.target.value)} />
                 </Field>
                 <Field label="Cost" prefix="৳" suffix={per(i.unit)}>
-                  <input className="input num" type="number" inputMode="decimal" min="0" step="0.01" required value={i.unitCost} onChange={(e) => set(i.id, 'unitCost', e.target.value)} />
+                  <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step="0.01" value={i.unitCost} onChange={(e) => set(i.id, 'unitCost', e.target.value)} />
                 </Field>
+                <div className="col-span-2">
+                  <Field label="Expiry"><input className="input num" type="date" value={i.expiresOn} onChange={(e) => set(i.id, 'expiresOn', e.target.value)} /></Field>
+                </div>
               </div>
             </div>
           ))}
@@ -1409,6 +1587,149 @@ function PurchaseEdit({ view, onClose, onSaved }) {
   )
 }
 
+/** The seller's own photos (up to 6), one video, description and ingredients for a product. onBusy(true) while a file uploads. */
+function DetailsFields({ value: det, onChange: setDet, onBusy, onError }) {
+  const [sending, setSending] = useState(null) // 'photo' | 'video'
+  const latest = useRef(det) // what is typed while a file is still uploading
+  latest.current = det
+  const addFile = (kind) => async (e) => {
+    const file = e.target.files[0]
+    e.target.value = ''
+    if (!file) return
+    onError(null)
+    setSending(kind)
+    onBusy(true)
+    try {
+      const url = await upload(file)
+      latest.current = kind === 'video' ? { ...latest.current, videoUrl: url } : { ...latest.current, imageUrls: [...latest.current.imageUrls, url] }
+      setDet(latest.current)
+    } catch (err) { onError(err) } finally { setSending(null); onBusy(false) }
+  }
+  return (
+    <>
+      <ul className="grid grid-cols-4 gap-2" aria-label="Photos">
+        {det.imageUrls.map((url, n) => (
+          <li key={url} className="relative">
+            <ProductImage src={url} alt={`Photo ${n + 1}`} className="aspect-square w-full rounded-lg ring-1 ring-line" />
+            <button type="button" aria-label={`Remove photo ${n + 1}`} onClick={() => setDet({ ...det, imageUrls: det.imageUrls.filter((u) => u !== url) })}
+                    className="absolute -top-2 -right-2 inline-flex size-11 items-center justify-center">
+              <span className="grid size-6 place-items-center rounded-full bg-ink text-white"><X className="size-3.5" aria-hidden /></span>
+            </button>
+          </li>
+        ))}
+        {det.imageUrls.length < 6 && (
+          <li>
+            <label className={`flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-line text-xs font-medium text-muted hover:bg-brand-50 hover:text-ink focus-within:ring-2 focus-within:ring-brand-700/30 ${sending ? 'pointer-events-none opacity-50' : ''}`}>
+              <ImagePlus className="size-5" aria-hidden />
+              {sending === 'photo' ? 'Sending…' : 'Photo'}
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!!sending} onChange={addFile('photo')} />
+            </label>
+          </li>
+        )}
+      </ul>
+      {det.videoUrl ? (
+        <div className="space-y-1">
+          <video src={det.videoUrl} controls preload="metadata" className="max-h-56 w-full rounded-lg bg-ink" aria-label="Product video" />
+          <button type="button" className="btn-danger" onClick={() => setDet({ ...det, videoUrl: '' })}><Trash2 className="size-4" aria-hidden /> Remove video</button>
+        </div>
+      ) : (
+        <label className={`btn-quiet w-full cursor-pointer border-dashed focus-within:ring-2 focus-within:ring-brand-700/30 ${sending ? 'pointer-events-none opacity-50' : ''}`}>
+          <Video className="size-4" aria-hidden /> {sending === 'video' ? 'Sending…' : 'Video'}
+          <input type="file" accept="video/mp4,video/webm" className="sr-only" disabled={!!sending} onChange={addFile('video')} />
+        </label>
+      )}
+      <Field label="Description">
+        <textarea className="input" rows={3} maxLength={2000} value={det.description} onChange={(e) => setDet({ ...det, description: e.target.value })} />
+      </Field>
+      <Field label="Ingredients">
+        <textarea className="input" rows={2} maxLength={2000} value={det.ingredients} onChange={(e) => setDet({ ...det, ingredients: e.target.value })} />
+      </Field>
+    </>
+  )
+}
+const detailsOf = (l) => ({ description: l?.description || '', ingredients: l?.ingredients || '', imageUrls: l?.imageUrls || [], videoUrl: l?.videoUrl || '' })
+
+/**
+ * One product of a shipment, opened from the shipment page: everything that was left for later.
+ * Cost and expiry belong to this shipment's goods; price, photos, video and text belong to the product in the shop.
+ */
+function ShipmentProduct({ view, item: i, listing, onClose, onSaved }) {
+  const [amount, setAmount] = useState(String(Number(i.quantity)))
+  const [cost, setCost] = useState(i.unitCost == null ? '' : String(Number(i.unitCost)))
+  const [price, setPrice] = useState(i.price == null ? '' : String(Number(i.price)))
+  const [expiry, setExpiry] = useState(i.expiresOn || '')
+  const [unit, setUnit] = useState(i.unit) // sell unit; defaults to the unit the stock was received in
+  const [pack, setPack] = useState('') // new units in one old unit, when the sell unit changes
+  const [det, setDet] = useState(() => detailsOf(listing))
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [sending, setSending] = useState(false)
+  const converting = unit !== i.unit
+  const m = pct(cost === '' || (converting && !(Number(pack) > 0)) ? null : converting ? Number(cost) / Number(pack) : cost, price)
+  const submit = async (e) => {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    try {
+      const id = view.purchase.id
+      if (Number(amount) !== Number(i.quantity) || (cost !== '' && Number(cost) !== Number(i.unitCost ?? NaN)) || expiry !== (i.expiresOn || '')) {
+        await api(`/api/books/purchases/${id}`, { method: 'PUT', body: {
+          paymentMethod: view.purchase.paymentMethod, note: view.purchase.note,
+          items: [{ id: i.id, quantity: Number(amount), unitCost: cost === '' ? null : Number(cost), expiresOn: expiry || null }],
+        } })
+      }
+      if (converting) {
+        // the whole product is recounted in the new unit (10 crates of 20 kg → 200 kg) and priced per new unit
+        await api(`/api/listings/${i.listingId}/unit`, { method: 'POST', body: { unit, perOld: Number(pack), price: Number(price) } })
+      } else if (price !== '' && Number(price) !== Number(i.price ?? NaN)) {
+        await api(`/api/books/purchases/${id}/prices`, { method: 'PUT', body: [{ listingId: i.listingId, price: Number(price) }] })
+      }
+      await api(`/api/listings/${i.listingId}/details`, { method: 'PUT', body: { ...det, videoUrl: det.videoUrl || null } })
+      onSaved()
+    } catch (err) { setError(err); setBusy(false) }
+  }
+  return (
+    <Drawer title={i.productName} onClose={onClose} footer={(
+      <div className="space-y-2">
+        <ErrorMsg error={error} />
+        <button form="shipment-product" className="btn w-full" disabled={busy || sending}>{busy ? 'Saving…' : 'Save'}</button>
+      </div>
+    )}>
+      <form id="shipment-product" onSubmit={submit} className="divide-y divide-line">
+        <FormSection icon={Banknote} title="Cost and price" aside={m != null && <span className="num text-xs text-muted">{m}% margin</span>}>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="col-span-2">
+              <Field label="Qty" suffix={UNITS[i.unit][1]} hint={Number(i.sold) > 0 ? `${qty(i.sold, i.unit)} already sold; it can't go below that.` : undefined}>
+                <input className="input num" type="number" inputMode="decimal" required min={Number(i.sold) > 0 ? Number(i.sold) : isLoose(i.unit) ? '0.001' : '1'} step={isLoose(i.unit) ? '0.001' : '1'}
+                       value={amount} onChange={(e) => setAmount(e.target.value)} />
+              </Field>
+            </div>
+            <Picker label="Sell unit" value={unit} options={Object.entries(UNIT_NAMES).map(([value, label]) => ({ value, label }))}
+                    onChange={(v) => { setUnit(v); setPack(''); setPrice(v === i.unit && i.price != null ? String(Number(i.price)) : '') }} />
+            <Field label="Price" prefix="৳" suffix={per(unit)}>
+              <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0.01" step="0.01" required={converting} value={price} onChange={(e) => setPrice(e.target.value)} />
+            </Field>
+            {converting && (
+              <div className="col-span-2">
+                <Field label={`${UNITS[unit][0]} per ${UNITS[i.unit][0]}`} suffix={UNITS[unit][0]}>
+                  <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0.001" step="0.001" required value={pack} onChange={(e) => setPack(e.target.value)} />
+                </Field>
+              </div>
+            )}
+            <Field label="Cost" prefix="৳" suffix={per(i.unit)}>
+              <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)} />
+            </Field>
+            <Field label="Expiry"><input className="input num" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} /></Field>
+          </div>
+        </FormSection>
+        <FormSection icon={ImagePlus} title="Details">
+          <DetailsFields value={det} onChange={setDet} onBusy={setSending} onError={setError} />
+        </FormSection>
+      </form>
+    </Drawer>
+  )
+}
+
 /** Receive goods (a purchase: stock up, cost averages in, money out) or correct a product's count, price and settings. */
 function StockEntry({ products, listings, productById, categories, pid, initialMode, onClose, onSaved, onRemove, onRequest }) {
   const mine = (id) => listings.data.find((l) => String(l.productId) === String(id))
@@ -1416,7 +1737,7 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
     const l = mine(id)
     return {
       productId: String(id || ''), qty: '', unit: l?.unit || 'PCS', recv: l?.unit || 'PCS', pack: '', price: l?.price ?? '', costPrice: '',
-      reorderLevel: l?.reorderLevel ?? '', note: '', sourceNote: l?.sourceNote || '', active: l?.active ?? true, method: 'CASH',
+      reorderLevel: l?.reorderLevel ?? '', note: '', sourceNote: l?.sourceNote || '', active: l && l.price != null ? l.active : true, method: 'CASH', expiry: '',
     }
   }
   const [form, setForm] = useState(() => {
@@ -1424,6 +1745,8 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
     const l = mine(pid)
     return initialMode === 'set' && l ? { ...f, qty: String(Number(l.stock)), costPrice: l.costPrice ?? '' } : f
   })
+  const [det, setDet] = useState(() => detailsOf(mine(pid)))
+  const [sending, setSending] = useState(false) // a photo or video is uploading
   const [mode, setMode] = useState(initialMode)
   const presetP = products.data.find((p) => String(p.id) === String(pid))
   const [cat, setCat] = useState(String(presetP?.categoryId || ''))
@@ -1432,7 +1755,7 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
   const [busy, setBusy] = useState(false)
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
-  const pick = (id) => { setError(null); setMode('add'); setForm(blank(id)) }
+  const pick = (id) => { setError(null); setMode('add'); setForm(blank(id)); setDet(detailsOf(mine(id))) }
   const switchMode = (m) => {
     const l = mine(form.productId)
     setMode(m)
@@ -1447,9 +1770,12 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
   const cost2 = unitCost == null ? null : Math.round(unitCost * 100) / 100
   const after = adding ? Number(current?.stock || 0) + amount : amount
   const unitLocked = current && Number(current.stock) !== 0
+  // Edit: stock counted in crates can be recounted in kg (10 crates of 20 kg → 200 kg); the price is then given per kg.
+  const converting = !adding && unitLocked && form.unit !== current.unit
+  const per1 = Number(form.pack || 0)
   const step = isLoose(form.unit) ? '0.001' : '1'
   const bill = adding && amount > 0 && cost2 != null ? Math.round(amount * cost2 * 100) / 100 : 0
-  const m = pct(adding && cost2 != null && current?.costPrice != null && amount > 0
+  const m = converting ? pct(per1 > 0 && current.costPrice != null ? Number(current.costPrice) / per1 : null, form.price) : pct(adding && cost2 != null && current?.costPrice != null && amount > 0
     ? (Number(current.stock) * Number(current.costPrice) + amount * cost2) / (Number(current.stock) + amount) : (cost2 ?? current?.costPrice), form.price)
   const name = productById.get(Number(form.productId))?.name
 
@@ -1472,8 +1798,14 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
         productId: Number(form.productId), unit: form.unit, price: Number(form.price),
         reorderLevel: form.reorderLevel === '' ? null : Number(form.reorderLevel), sourceNote: form.sourceNote, active: form.active,
       }
-      if (!adding) {
+      if (converting) {
+        const res = await api(`/api/listings/${current.id}/unit`, { method: 'POST', body: { unit: form.unit, perOld: per1, price: Number(form.price) } })
+        await api('/api/listings', { method: 'PUT', body: { ...settings, reorderLevel: res.reorderLevel } })
+        await api(`/api/listings/${res.id}/details`, { method: 'PUT', body: { ...det, videoUrl: det.videoUrl || null } })
+        onSaved(`${name}: ${qty(res.stock, res.unit)} in stock.`)
+      } else if (!adding) {
         const res = await api('/api/listings', { method: 'PUT', body: { ...settings, stock: amount, costPrice: cost2, note } })
+        await api(`/api/listings/${res.id}/details`, { method: 'PUT', body: { ...det, videoUrl: det.videoUrl || null } })
         onSaved(`${name}: ${qty(res.stock, res.unit)} in stock.`)
       } else {
         // Settings first (adds the product to the shop if it's new), then the goods arrive as a purchase: stock up, cost averages in, money out.
@@ -1481,7 +1813,7 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
         if (amount > 0) {
           await api('/api/books/purchases', {
             method: 'POST',
-            body: { items: [{ productId: Number(form.productId), quantity: amount, unitCost: cost2 }], paymentMethod: form.method, note },
+            body: { items: [{ productId: Number(form.productId), quantity: amount, unitCost: cost2, expiresOn: form.expiry || null }], paymentMethod: form.method, note },
           })
         }
         onSaved(amount > 0 ? `${name}: received ${qty(amount, form.unit)} for ${money(bill)}.` : `${name} saved.`)
@@ -1498,20 +1830,15 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
       <div className="space-y-2">
         {form.productId && (
           <dl className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted">
-            <div className="flex gap-1"><dt>Stock</dt><dd className="num font-semibold text-ink">{qty(current?.stock || 0, form.unit)} → {qty(after, form.unit)}</dd></div>
+            {!converting && <div className="flex gap-1"><dt>Stock</dt><dd className="num font-semibold text-ink">{qty(current?.stock || 0, form.unit)} → {qty(after, form.unit)}</dd></div>}
             {bill > 0 && <div className="flex gap-1"><dt>Bill</dt><dd className="num font-semibold text-ink">{money(bill)}</dd></div>}
             {m != null && <div className="flex gap-1"><dt>Margin</dt><dd className="num font-semibold text-ink">{m}%</dd></div>}
           </dl>
         )}
         <ErrorMsg error={error} />
-        <button form="stock-form" className="btn w-full" disabled={busy}>
+        <button form="stock-form" className="btn w-full" disabled={busy || sending}>
           {busy ? 'Saving…' : !adding ? 'Save' : amount > 0 ? `Receive ${qty(amount, form.unit)}` : current ? 'Save changes' : 'Add to stock'}
         </button>
-        {current && (
-          <button type="button" className="btn-danger w-full" onClick={() => onRemove(current)}>
-            <Trash2 className="size-4" aria-hidden /> Remove from shop
-          </button>
-        )}
       </div>
     )}>
       <form id="stock-form" onSubmit={submit} className="divide-y divide-line" aria-label="Stock entry">
@@ -1531,7 +1858,7 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
           )}
         </FormSection>
 
-        <FormSection icon={PackagePlus} title={adding ? 'Received' : 'Count'}>
+        {!converting && <FormSection icon={PackagePlus} title={adding ? 'Received' : 'Count'}>
           <div className="grid grid-cols-2 gap-2">
             <Field label={adding ? 'Qty' : 'Count'} suffix={UNITS[adding ? form.recv : form.unit][1]}>
               <input className="input num" type="number" inputMode="decimal" placeholder="0" step={isLoose(adding ? form.recv : form.unit) ? '0.001' : '1'} min={adding && !current ? step : 0}
@@ -1553,25 +1880,39 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
                   <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0" step="0.01" required={Number(form.qty) > 0} value={form.costPrice} onChange={set('costPrice')} />
                 </Field>
                 {Number(form.qty) > 0 && <Picker label="Paid by" value={form.method} onChange={(v) => setForm({ ...form, method: v })} options={METHODS.map(([value, label]) => ({ value, label }))} />}
+                {Number(form.qty) > 0 && <Field label="Expiry"><input className="input num" type="date" value={form.expiry} onChange={set('expiry')} /></Field>}
               </>
             )}
           </div>
-        </FormSection>
+        </FormSection>}
 
         <FormSection icon={Banknote} title="Selling">
           <div className="grid grid-cols-2 gap-2">
-            <Picker label="Sell unit" value={form.unit} disabled={unitLocked} onChange={(v) => setForm({ ...form, unit: v, recv: current ? form.recv : v })}
+            <Picker label="Sell unit" value={form.unit} disabled={unitLocked && adding}
+                    onChange={(v) => setForm({ ...form, unit: v, recv: current ? form.recv : v, ...(!adding && unitLocked ? { pack: '', price: v === current.unit ? current.price ?? '' : '' } : {}) })}
                     options={Object.entries(UNIT_NAMES).map(([value, label]) => ({ value, label }))} />
             <Field label="Price" prefix="৳" suffix={per(form.unit)}>
               <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0.01" step="0.01" required value={form.price} onChange={set('price')} />
             </Field>
           </div>
-          {unitLocked && <p className="hint -mt-1.5">Counted in {UNITS[current.unit][1]}. Set the count to 0 to change it.</p>}
+          {converting && (
+            <Field label={`${UNITS[form.unit][0]} per ${UNITS[current.unit][0]}`} suffix={UNITS[form.unit][0]}>
+              <input className="input num" type="number" inputMode="decimal" placeholder="0" min="0.001" step="0.001" required value={form.pack} onChange={set('pack')} />
+            </Field>
+          )}
+          {converting && per1 > 0 && <p className="hint -mt-1.5 num">{qty(current.stock, current.unit)} becomes {qty(Number(current.stock) * per1, form.unit)}{current.costPrice != null && `, cost ${money(Number(current.costPrice) / per1)}${per(form.unit)}`}.</p>}
+          {unitLocked && adding && <p className="hint -mt-1.5">Counted in {UNITS[current.unit][1]}. Change it in Edit.</p>}
         </FormSection>
+
+        {!adding && (
+          <FormSection icon={ImagePlus} title="Details">
+            <DetailsFields value={det} onChange={setDet} onBusy={setSending} onError={setError} />
+          </FormSection>
+        )}
 
         <FormSection icon={MessageSquare} title="Note">
           <Field label={adding ? 'Note' : 'Reason'}>
-            <input className="input" maxLength={200} autoComplete="off" required={!adding && current && amount !== Number(current.stock)}
+            <input className="input" maxLength={200} autoComplete="off" required={!adding && !converting && current && amount !== Number(current.stock)}
                    placeholder={adding ? 'Invoice no…' : 'Damaged, recount…'} value={form.note} onChange={set('note')} />
           </Field>
           <details>
@@ -1589,6 +1930,11 @@ function StockEntry({ products, listings, productById, categories, pid, initialM
                 <input type="checkbox" className="size-5 accent-black" checked={form.active} onChange={set('active')} />
                 Sell online
               </label>
+              {current && (
+                <button type="button" className="btn-danger w-full" onClick={() => onRemove(current)}>
+                  <Trash2 className="size-4" aria-hidden /> Remove from shop
+                </button>
+              )}
             </div>
           </details>
         </FormSection>
@@ -1625,12 +1971,8 @@ function ProductRequests({ categories }) {
         <Field label="Product">
           <input className="input" required maxLength={200} autoComplete="off" placeholder="Khejur Gur 500g…" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </Field>
-        <Field label="Group">
-          <select className="input" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
-            <option value="">Not sure</option>
-            {leaf.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </Field>
+        <Picker label="Group" value={String(form.categoryId)} onChange={(v) => setForm({ ...form, categoryId: v })}
+                options={[{ value: '', label: 'Not sure' }, ...leaf.map((c) => ({ value: String(c.id), label: c.name }))]} />
         <button className="btn w-full" disabled={busy}>{busy ? 'Sending…' : 'Send request'}</button>
       </form>
       <div className="mt-2"><ErrorMsg error={error || mine.error} /></div>

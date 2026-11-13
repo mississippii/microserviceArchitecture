@@ -47,7 +47,21 @@ public class CatalogController {
                                  Boolean active,
                                  @DecimalMin("0") @Digits(integer = 10, fraction = 2) BigDecimal costPrice) {}
 
+    /** A photo or video is one this server stores (/uploads/…) or an https link. */
+    private static final String MEDIA = "^(/uploads/[A-Za-z0-9.-]{1,80}|https://\\S{1,480})$";
+
+    public record DetailsRequest(@Size(max = 2000) String description,
+                                 @Size(max = 2000) String ingredients,
+                                 @NotNull @Size(max = 6) List<@NotNull @Pattern(regexp = MEDIA, message = "must be an uploaded file or an https link") String> imageUrls,
+                                 @Pattern(regexp = MEDIA, message = "must be an uploaded file or an https link") String videoUrl) {}
+
     // ----- public (GET /api/catalog/** needs no login) -----
+
+    /** What a seller says about their offer: photos, video, description, ingredients. */
+    @GetMapping("/api/catalog/listings/{id}")
+    public CatalogService.ListingDetails listingDetails(@PathVariable Long id) {
+        return catalog.listingDetails(id);
+    }
 
     @GetMapping("/api/catalog/categories")
     public List<Category> categories() {
@@ -134,6 +148,23 @@ public class CatalogController {
                 r.unit(), r.reorderLevel(), r.stock(), r.addStock(), r.note(), r.sourceNote(), r.active() == null || r.active()));
     }
 
+    /** perOld = how many of the new unit are in one of the old (20 kg in a crate). */
+    public record UnitRequest(@NotNull Listing.Unit unit,
+                              @NotNull @DecimalMin("0.001") @DecimalMax("100000") @Digits(integer = 6, fraction = 3) BigDecimal perOld,
+                              @NotNull @DecimalMin("0.01") @Digits(integer = 10, fraction = 2) BigDecimal price) {}
+
+    @PostMapping("/api/listings/{id}/unit")
+    @PreAuthorize("hasRole('SELLER')")
+    public Listing convertUnit(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id, @Valid @RequestBody UnitRequest r) {
+        return catalog.convertUnit(Long.valueOf(jwt.getSubject()), id, r.unit(), r.perOld(), r.price());
+    }
+
+    @PutMapping("/api/listings/{id}/details")
+    @PreAuthorize("hasRole('SELLER')")
+    public Listing setDetails(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id, @Valid @RequestBody DetailsRequest r) {
+        return catalog.setDetails(Long.valueOf(jwt.getSubject()), id, r.description(), r.ingredients(), r.imageUrls(), r.videoUrl());
+    }
+
     @DeleteMapping("/api/listings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('SELLER')")
@@ -145,6 +176,13 @@ public class CatalogController {
     @PreAuthorize("hasRole('SELLER')")
     public List<StockMovement> stockRegister(@AuthenticationPrincipal Jwt jwt) {
         return catalog.stockRegister(Long.valueOf(jwt.getSubject()));
+    }
+
+    /** Goods on the shelf, batch by batch: what is left of each receipt, its cost and its expiry date. */
+    @GetMapping("/api/listings/me/batches")
+    @PreAuthorize("hasRole('SELLER')")
+    public List<StockBatch> batches(@AuthenticationPrincipal Jwt jwt) {
+        return catalog.myBatches(Long.valueOf(jwt.getSubject()));
     }
 
     @GetMapping("/api/listings/{id}/movements")

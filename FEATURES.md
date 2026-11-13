@@ -1,7 +1,7 @@
 # Features
 
 Every feature of the marketplace, by role: what is built, what is partly built, and what still has to be built.
-Checked against the code on 11 Nov 2026 (backend `Marketplace/`, web `Web/`).
+Checked against the code on 13 Nov 2026 (backend `Marketplace/`, web `Web/`).
 
 **Legend:** ✅ built and working · 🟡 partly built (the gap is named) · ⬜ not built yet
 
@@ -17,6 +17,7 @@ Checked against the code on 11 Nov 2026 (backend `Marketplace/`, web `Web/`).
 | ✅ | Log in | By phone, or by email (staff log in by email) |
 | ✅ | Stay logged in | JWT token kept in the browser |
 | ✅ | Log out | Back gesture after logging out does not reopen the private area |
+| ✅ | Seller swiping back out of the Seller Centre | Asks "Do you want to log out?" instead of showing the customer site; Cancel stays in the Seller Centre |
 | ✅ | Signed-in users skip the login page | Opening `/login` or `/register` while signed in goes to your own area; swiping back after login skips the login form |
 | ✅ | Each role lands in its own area | Customer → shop, seller → Seller Centre, admin / verifier → Admin |
 | ✅ | Edit profile | Name and email (a seller must keep an email) |
@@ -58,8 +59,9 @@ Checked against the code on 11 Nov 2026 (backend `Marketplace/`, web `Web/`).
 | | Feature | Notes |
 |---|---|---|
 | ✅ | Category tiles ("Shop by category") | Photo tiles, 4 across on phones; groups with stock first; photos fill the tile |
-| ✅ | Category photos | Fruits, Vegetables, Grocery from the owner's photos; Fish, Spices, Baby Care composites |
+| ✅ | Category photos | All from the owner's photos: Fruits, Vegetables, Grocery, Spices, Baby Care, Meat & Fish, Artisan Craft, Fashion. A group shows once it has products or a photo |
 | ✅ | One product row per category group | Sideways row on phones, grid on desktop, "See all" link |
+| ✅ | One card per product, not per variety | আম shows once with its lowest price and "N varieties"; the varieties show after a tap |
 | ✅ | Floating "Start shopping" button (phones) | Facebook blue, continuous ripple, hides at the footer; opens the catalogue with the filter panel open |
 | ✅ | "Sell your original products" band | Links to seller sign-up |
 | ⬜ | Promotions / offers / featured listings | Business plan phase 4 |
@@ -69,6 +71,7 @@ Checked against the code on 11 Nov 2026 (backend `Marketplace/`, web `Web/`).
 | | Feature | Notes |
 |---|---|---|
 | ✅ | Browse every in-stock product from verified shops | No location needed (user decision) |
+| 🟡 | One card per product | Home groups varieties under their product; this page still lists each variety (আম - হিমসাগর, আম - ল্যাংড়া) as its own card |
 | ✅ | Search by product name | From the header search |
 | ✅ | Filter by category and sub-category | Desktop: left column; phones: half-screen panel from the left, desktop-size text |
 | ✅ | Filter by origin district | Shown when products carry an origin |
@@ -85,6 +88,7 @@ Checked against the code on 11 Nov 2026 (backend `Marketplace/`, web `Web/`).
 | | Feature | Notes |
 |---|---|---|
 | ✅ | Product details, origin, photo | |
+| ✅ | Varieties of a product | A product with varieties lists the ones in stock ("from ৳…"); each opens its own sellers, with a link back to the product |
 | ✅ | All sellers of the product side by side | Price, quality score, stock, batch source |
 | ✅ | Sort offers by best price or best quality | |
 | ✅ | Buy now (one offer) | Quantity, delivery address, cash on delivery |
@@ -167,7 +171,11 @@ Phones: bottom bar with Home, Sells, Orders, Stock and More (Customers, Accounts
 | | Feature | Notes |
 |---|---|---|
 | ✅ | Shipment list as photo tiles | Named product + date, e.g. খেজুর_11_Nov (two products: আম+লিচু_11_Nov); varieties underneath; total with extra costs |
-| ✅ | New shipment ("+ Stock") with several varieties | Group → product → one line per variety (Qty, Unit, Cost, Price, margin); "Add variety"; one purchase; opens the new shipment |
+| ✅ | New shipment ("+ Stock"): one product, many varieties | Group → product, then "Add items" (as CBTrading's shipment form): Variety, Qty, Unit, **+ Add** puts the line in the Items list (✕ removes it). Cost, Sell unit, Price and Expiry sit behind "Cost and price" and can be left for later. One purchase; opens the new shipment |
+| ✅ | One photo per shipment | The product's own photo on the tile and the shipment page; varieties are listed by name |
+| ✅ | Fill in a shipment later | Tap a product on the shipment page: Cost, Sell unit (defaults to the unit it was received in; changing it asks e.g. "kg per crate" and recounts the stock), Price, Expiry, photos, video, description, ingredients in one sheet. Rows say "Add cost · Add price" until they are set |
+| ✅ | No price = not on sale | A product received without a price is in stock and can be sold at the counter, but customers don't see it until it has a price |
+| ✅ | Receive by the crate, price by the kg, per line | Unit ≠ Sell unit asks "kg per crate"; stock and cost are stored in the sell unit; the seller sets any price |
 | ✅ | Paid by + note on a shipment | Cash, bKash, Nagad, Rocket, Card, Bank |
 | ✅ | New price on an existing product applied on receive | |
 | ✅ | Request a missing product | Link inside the new-shipment form; admin approves |
@@ -181,14 +189,18 @@ Phones: bottom bar with Home, Sells, Orders, Stock and More (Customers, Accounts
 | ✅ | Low-stock alert | Notification when stock crosses the product's level (default 5) |
 | ✅ | Restock / correct one product | Receive more, or set the counted stock with a reason (gain or loss at cost) |
 | ✅ | Repack units | Buy by the crate, sell by the kg |
+| ✅ | Recount existing stock in another unit | Edit a product → Sell unit → "kg per crate": 10 crates become 200 kg, cost and history follow, price is typed again per kg. Refused while the product has open online orders |
 | ✅ | Remove a product from the shop | History kept; it comes back when stocked again |
 | ✅ | Shop-only products | "Sell online" switch per product |
 | 🟡 | Remove a shipment's extra cost | Only from Accounts → Expenses (the section was removed from the shipment page) |
 | 🟡 | Stock register (every movement) | Recorded by the backend; the screen was removed (user decision) |
-| 🟡 | Sold-through per shipment | Stock is one running total per product, so a shipment can't say how much of *its* goods sold |
-| ⬜ | Batch / lot tracking (FIFO per shipment) | Would enable per-shipment sold % and profit |
+| ✅ | Batch tracking (oldest goods sell first) | Every receipt is its own batch; a sale records which batch it took from; a cancelled or voided sale goes back to the same batch |
+| ✅ | Sold-through per shipment | Shipment page and tile: % sold, left and sold per product, Sales, Profit so far (sales − cost of what sold − the shipment's extra costs; refunded orders earn nothing) |
+| ✅ | Expiry dates | Optional per shipment line (new shipment, single restock, edit); shown on the shipment and the sell form; "Expiring" badge on Home within 3 days |
+| ✅ | Expiry alerts | Notification every morning (09:00 Dhaka) 3 days before and on the day |
+| ✅ | Expired goods are never sold | Sellable up to and including the expiry date. After it, a shop sale or online order that would need them is refused; just after midnight (Dhaka) they come off stock as a loss at cost and the seller is notified |
+| ✅ | Seller's product details | Edit a product → Details: up to 6 photos and one video (uploaded from the phone), description, ingredients; customers open them with "Details" on the seller's offer |
 | ⬜ | Barcode / SKU | |
-| ⬜ | Expiry dates for perishables | |
 
 ### 3.4 Sells
 | | Feature | Notes |
@@ -201,7 +213,8 @@ Phones: bottom bar with Home, Sells, Orders, Stock and More (Customers, Accounts
 | ✅ | Today's totals | Today, in shop, online |
 | ✅ | One list of all sales | All / Online / In shop |
 | ✅ | Void a shop sale | Stock comes back |
-| ⬜ | Printed / shared receipt (PDF, SMS) | |
+| ✅ | Receipt for a shop sale | Printer button on the sale → slip → Print (or save as PDF from the print dialog) |
+| ⬜ | Receipt by SMS | |
 | ⬜ | Returns of part of a sale | Only full void today |
 
 ### 3.5 Orders (online)
@@ -213,7 +226,7 @@ Phones: bottom bar with Home, Sells, Orders, Stock and More (Customers, Accounts
 | ✅ | Customer name and phone to call | |
 | ✅ | Order progress trail | |
 | ⬜ | Book a courier from the order | |
-| ⬜ | Packing slip / invoice print | |
+| ✅ | Invoice / packing slip print | Printer button on the order: shop, customer, address, lines, total |
 
 ### 3.6 Customers (dues)
 | | Feature | Notes |
@@ -236,7 +249,8 @@ Phones: bottom bar with Home, Sells, Orders, Stock and More (Customers, Accounts
 | ✅ | Profit per product | |
 | ✅ | Dues: what customers owe | |
 | ✅ | My shop (edit shop details) | |
-| ⬜ | Export to Excel / PDF | |
+| ✅ | Export to CSV (opens in Excel) | Accounts (profit and loss, money by method, product profit), Day book, customer statement |
+| ⬜ | Export to PDF | |
 | ⬜ | Charts over time | |
 
 ### 3.8 Day book
@@ -294,13 +308,13 @@ Tabs: Overview, Verification, Issues, Sellers, Orders, Catalogue.
 | | Feature | Notes |
 |---|---|---|
 | ✅ | Spring Boot 3.5 / Java 21 modular monolith | Modules: auth, catalog, customer, order, payment, review, seller, books, verification, activity |
-| ✅ | PostgreSQL + PostGIS, Flyway migrations V1–V16 | |
+| ✅ | PostgreSQL + PostGIS, Flyway migrations V1–V21 | |
 | ✅ | Role-based security on every endpoint | CUSTOMER, SELLER, ADMIN, VERIFIER |
 | ✅ | Balances computed from rows, never stored | Dues, stock value, profit |
 | ✅ | Integration test of the whole flow | `MarketplaceFlowTest` (Testcontainers) |
 | ⬜ | Production deployment, backups, monitoring | |
 | ⬜ | Rate limiting (Redis) | |
-| ⬜ | File storage for images and documents | |
+| 🟡 | File storage for images and documents | Product photos and videos upload to the server's disk (`UPLOADS_DIR`, served at `/uploads/`); no resizing; removed files stay on disk; verification documents are still links. Move to R2 / S3 before production |
 | ⬜ | Maps / address lookup (Barikoi) | |
 | ⬜ | Legal pages (terms, privacy, refund policy) | Checklist in the business plan |
 
@@ -308,13 +322,13 @@ Tabs: Overview, Verification, Issues, Sellers, Orders, Catalogue.
 
 ## 7. What to build next (suggested order)
 
-1. **Image upload** for products, shop and verification documents.
+1. **Object storage (R2 / S3) with thumbnails**, and file upload for the catalogue photo, shop and verification documents.
 2. **Forgot password** and **phone OTP** (sign-up, login, COD fraud guard).
 3. **Online payments**: bKash / Nagad / SSLCommerz, holding the money until delivery.
 4. **Delivery fee and courier booking / tracking** (Pathao, Steadfast, RedX).
 5. **SMS notifications** for orders, dues and low stock.
 6. **Staff account management** in Admin.
 7. **Claim time window and seller penalties.**
-8. **Receipts and exports**: shop-sale receipt, order invoice, accounts to Excel / PDF.
-9. **Per-shipment (batch) stock tracking** so each shipment shows sold % and real profit.
+8. **Returns of part of a sale** and a **credit limit** per customer.
+9. **Barcode / SKU.**
 10. **Seller subscriptions, featured listings, promotions** (growth phase).

@@ -16,12 +16,30 @@ export default function Shop() {
   const inStock = useProducts()
   const groups = useMemo(() => {
     const all = categories.data || []
+    // One card per product: its varieties (আম - হিমসাগর, আম - ল্যাংড়া) fold into আম, with the lowest price; they show after a tap.
+    const byId = new Map((catalogue.data || []).map((p) => [p.id, p]))
+    const folded = (items) => {
+      const cards = new Map()
+      items.forEach((p) => {
+        const parent = byId.get(byId.get(p.id)?.parentId)
+        const key = parent?.id ?? p.id
+        const card = cards.get(key)
+        if (card) {
+          card.minPrice = Math.min(Number(card.minPrice), Number(p.minPrice))
+          card.sellerCount = Math.max(card.sellerCount, p.sellerCount)
+          if (parent) card.varieties = (card.varieties || 0) + 1
+        } else {
+          cards.set(key, parent ? { ...p, id: parent.id, name: parent.name, imageUrl: parent.imageUrl || p.imageUrl, originRegion: parent.originRegion, varieties: 1 } : { ...p })
+        }
+      })
+      return [...cards.values()]
+    }
     return all.filter((c) => !c.parentId).map((g) => {
       const ids = new Set([g.id, ...all.filter((c) => c.parentId === g.id).map((c) => c.id)])
       return {
         ...g,
         listed: (catalogue.data || []).some((p) => ids.has(p.categoryId)),
-        items: (inStock.data || []).filter((p) => ids.has(p.categoryId)),
+        items: folded((inStock.data || []).filter((p) => ids.has(p.categoryId))),
       }
     }).sort((a, b) => Number(b.items.length > 0) - Number(a.items.length > 0)) // groups with stock first
   }, [categories.data, catalogue.data, inStock.data])
@@ -32,7 +50,8 @@ export default function Shop() {
       <h1 className="sr-only">Original products from verified sellers</h1>
       <StartShopping />
       <ErrorMsg error={categories.error || catalogue.error || inStock.error} />
-      <Categories groups={groups.filter((g) => g.listed)} loading={!ready} />
+      {/* a group shows once it has products in the catalogue, or a photo of its own (a new group waiting for its first products) */}
+      <Categories groups={groups.filter((g) => g.listed || g.imageUrl)} loading={!ready} />
       {!inStock.data ? <ProductGridSkeleton count={4} /> : groups.filter((g) => g.items.length > 0).map((g) => <GroupRow key={g.id} group={g} />)}
       <SellerBand />
     </div>

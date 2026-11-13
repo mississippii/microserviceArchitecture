@@ -13,4 +13,7 @@ public interface NearbyOffer {
     String getSourceNote();
     BigDecimal getQualityScore();
     Double getDistanceM();
+
+    /** The seller added photos, a video, a description or ingredients. */
+    Boolean getHasDetails();
 }

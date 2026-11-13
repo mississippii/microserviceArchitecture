@@ -108,12 +108,16 @@ public class BooksService {
 
     // ---------- purchases: stock comes in, its cost averages in, the money goes out ----------
 
-    /** price and unit are only needed for a product the shop doesn't sell yet. */
-    public record Line(Long productId, BigDecimal quantity, BigDecimal unitCost, BigDecimal price, Listing.Unit unit) {}
+    /** Only the product and quantity are needed. unitCost and price can be added later from the shipment; unit is for a product new to the shop. */
+    public record Line(Long productId, BigDecimal quantity, BigDecimal unitCost, BigDecimal price, Listing.Unit unit, java.time.LocalDate expiresOn) {}
 
-    /** price and stock are the product's now, in the shop. */
+    /**
+     * price and stock are the product's now, in the shop. remaining = what is left of this line's own goods;
+     * sold and revenue = what customers bought out of it (oldest goods sell first).
+     */
     public record ItemView(Long id, Long listingId, Long productId, String productName, String imageUrl, String unit,
-                           BigDecimal quantity, BigDecimal unitCost, BigDecimal price, BigDecimal stock) {}
+                           BigDecimal quantity, BigDecimal unitCost, BigDecimal price, BigDecimal stock,
+                           BigDecimal remaining, BigDecimal sold, BigDecimal revenue, java.time.LocalDate expiresOn) {}
 
     /** costs: transport, labour… paid for this shipment; they count as expenses in the accounts. */
     public record PurchaseView(Purchase purchase, List<ItemView> items, List<com.marketplace.seller.Expense> costs) {}
@@ -123,7 +127,7 @@ public class BooksService {
         var sellerId = sellerService.myVerifiedShop(userId).getId();
         var p = new Purchase();
         p.setSellerId(sellerId);
-        p.setTotal(lines.stream().map(l -> l.quantity().multiply(l.unitCost()))
+        p.setTotal(lines.stream().filter(l -> l.unitCost() != null).map(l -> l.quantity().multiply(l.unitCost()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP));
         p.setPaymentMethod(method);
         p.setNote(clean(note));
@@ -136,8 +140,8 @@ public class BooksService {
             item.setListingId(listing.getId());
             item.setQuantity(line.quantity());
             item.setUnitCost(line.unitCost());
+            item.setBatchId(catalog.receiveStock(sellerId, listing.getId(), line.quantity(), line.unitCost(), register, line.expiresOn()));
             purchaseItems.save(item);
-            catalog.receiveStock(sellerId, listing.getId(), line.quantity(), line.unitCost(), register);
         }
         return view(p);
     }
@@ -146,8 +150,8 @@ public class BooksService {
         return purchases.findTop300BySellerIdAndCancelledAtIsNullOrderByIdDesc(shopId(userId)).stream().map(this::view).toList();
     }
 
-    /** A changed line of a purchase. quantity 0 takes it off the bill. */
-    public record LineEdit(Long itemId, BigDecimal quantity, BigDecimal unitCost) {}
+    /** A changed line of a purchase. quantity 0 takes it off the bill; unitCost null keeps the line's cost. */
+    public record LineEdit(Long itemId, BigDecimal quantity, BigDecimal unitCost, java.time.LocalDate expiresOn) {}
 
     /** Edit a purchase any time: each changed line moves stock and the average cost by the difference. */
     @Transactional
@@ -157,17 +161,18 @@ public class BooksService {
         for (var e : edits) {
             var item = items.stream().filter(i -> i.getId().equals(e.itemId())).findFirst()
                     .orElseThrow(() -> Errors.notFound("purchase line " + e.itemId()));
-            catalog.reviseReceipt(item.getListingId(), item.getQuantity(), item.getUnitCost(), e.quantity(), e.unitCost(), "Purchase #" + purchaseId + " edited");
+            var cost = e.unitCost() != null ? e.unitCost() : item.getUnitCost(); // a quantity can be corrected before the cost is known
+            catalog.reviseReceipt(item.getBatchId(), e.quantity(), cost, e.expiresOn(), "Purchase #" + purchaseId + " edited");
             if (e.quantity().signum() == 0) {
                 purchaseItems.delete(item);
                 items.remove(item);
             } else {
                 item.setQuantity(e.quantity());
-                item.setUnitCost(e.unitCost());
+                item.setUnitCost(cost);
             }
         }
         if (items.isEmpty()) throw Errors.badRequest("A purchase needs at least one product. Delete the purchase instead.");
-        p.setTotal(items.stream().map(i -> i.getQuantity().multiply(i.getUnitCost())).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP));
+        p.setTotal(items.stream().filter(i -> i.getUnitCost() != null).map(i -> i.getQuantity().multiply(i.getUnitCost())).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP));
         p.setPaymentMethod(method);
         p.setNote(clean(note));
         return view(p);
@@ -178,7 +183,7 @@ public class BooksService {
     public void deletePurchase(Long userId, Long purchaseId) {
         var p = ownPurchase(userId, purchaseId);
         for (var i : purchaseItems.findByPurchaseId(purchaseId)) {
-            catalog.reviseReceipt(i.getListingId(), i.getQuantity(), i.getUnitCost(), BigDecimal.ZERO, i.getUnitCost(), "Purchase #" + purchaseId + " deleted");
+            catalog.reviseReceipt(i.getBatchId(), BigDecimal.ZERO, i.getUnitCost(), null, "Purchase #" + purchaseId + " deleted");
         }
         sellerService.deleteShipmentCosts(purchaseId); // its costs go with it
         p.setCancelledAt(OffsetDateTime.now());
@@ -214,11 +219,16 @@ public class BooksService {
 
     // ponytail: a few small queries per purchase line; batch them if the purchase list gets slow.
     private PurchaseView view(Purchase p) {
-        return new PurchaseView(p, purchaseItems.findByPurchaseId(p.getId()).stream().map(i -> {
+        var items = purchaseItems.findByPurchaseId(p.getId());
+        var sales = catalog.batchSales(items.stream().map(PurchaseItem::getBatchId).toList());
+        return new PurchaseView(p, items.stream().map(i -> {
             var l = catalog.listing(i.getListingId());
             var product = catalog.product(l.getProductId());
+            var batch = catalog.batch(i.getBatchId());
+            var s = sales.getOrDefault(i.getBatchId(), new CatalogService.BatchSales(BigDecimal.ZERO, BigDecimal.ZERO));
             return new ItemView(i.getId(), l.getId(), l.getProductId(), product.getName(), product.getImageUrl(), l.getUnit().name(),
-                    i.getQuantity(), i.getUnitCost(), l.getPrice(), l.getDeletedAt() == null ? l.getStock() : BigDecimal.ZERO);
+                    i.getQuantity(), i.getUnitCost(), l.getPrice(), l.getDeletedAt() == null ? l.getStock() : BigDecimal.ZERO,
+                    batch.getRemaining(), s.sold(), s.revenue(), batch.getExpiresOn());
         }).toList(), sellerService.shipmentCosts(p.getId()));
     }
 }

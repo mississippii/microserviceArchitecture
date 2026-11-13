@@ -64,3 +64,6 @@ CLAUDE.md
 coverage/
 .vite/
 *.tsbuildinfo
+
+# Sellers' uploaded photos and videos (local dev)
+Marketplace/uploads/

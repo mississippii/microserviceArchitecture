@@ -1,6 +1,6 @@
 import { Children, useMemo, useState } from 'react'
-import { BarChart3, ChevronLeft, ChevronRight, Phone, Plus, ReceiptText, Search, Store, UserRound, Users, X } from 'lucide-react'
-import { api, money, qty } from '../api'
+import { BarChart3, ChevronLeft, ChevronRight, Download, Phone, Plus, ReceiptText, Search, Store, UserRound, Users, X } from 'lucide-react'
+import { api, downloadCsv, money, qty } from '../api'
 import { Drawer, Empty, ErrorMsg, Fab, Field, Picker, Segmented, StatTile, Success, timeAgo, useLoad } from '../ui'
 
 // The seller's books: customers who buy on due, purchases, the day book and the accounts summary.
@@ -177,6 +177,10 @@ function Account({ id, onClose, onChange, onEdit }) {
               {(p.phone || p.address) && <p className="truncate text-xs text-muted">{[p.phone, p.address].filter(Boolean).join(' · ')}</p>}
             </div>
             {p.phone && <a href={`tel:${p.phone}`} className="btn-quiet px-3" aria-label={`Call ${p.name}`}><Phone className="size-4" aria-hidden /></a>}
+            <button type="button" className="btn-quiet px-3" aria-label={`Export ${p.name}'s statement`} onClick={() => downloadCsv(`statement-${p.name}`, [
+              ['Time', 'Entry', 'Sale', 'Paid', 'Method', 'Balance'],
+              ...st.data.lines.map(({ entry: e, balance }) => [dateTime(e.at), KIND[e.kind] || e.kind, e.kind === 'SALE' ? Number(e.amount) : '', Number(e.moneyIn), METHOD_LABEL[e.method || 'PLATFORM'], Number(balance)]),
+            ])}><Download className="size-4" aria-hidden /></button>
             <button type="button" className="btn-quiet" onClick={() => onEdit({ ...p })}>Edit</button>
           </div>
 
@@ -278,7 +282,12 @@ export function DayBook() {
 
   return (
     <section className="space-y-4" aria-label="Day book">
-      <SectionHead title="Day book" />
+      <SectionHead title="Day book">
+        <button type="button" className="btn-quiet" disabled={!entries.length} onClick={() => downloadCsv(`day-book-${day}`, [
+          ['Time', 'Entry', 'Detail', 'Amount', 'Money in', 'Money out', 'Method'],
+          ...entries.map((e) => [dateTime(e.at), KIND[e.kind] || e.kind, label(e), Number(e.amount), Number(e.moneyIn), Number(e.moneyOut), METHOD_LABEL[e.method || 'PLATFORM']]),
+        ])}><Download className="size-4" aria-hidden /> Export</button>
+      </SectionHead>
       <div className="panel flex items-center">
         <button type="button" className="inline-flex size-12 items-center justify-center" aria-label="Previous day" onClick={() => setDay(addDays(day, -1))}>
           <ChevronLeft className="size-5" aria-hidden />
@@ -364,6 +373,17 @@ export function Accounts({ onShop, go }) {
   return (
     <section className="space-y-4" aria-label="Accounts">
       <SectionHead title="Accounts">
+        <button type="button" className="btn-quiet" disabled={!s} onClick={() => downloadCsv(`accounts-${from}-to-${to}`, [
+          ['Profit and loss', `${from} to ${to}`],
+          ...pnl.map(([k, n]) => [k, Number(n)]),
+          ['Net profit', Number(s.netProfit)],
+          [],
+          ['Money', 'In', 'Out'],
+          ...s.byMethod.map((m) => [METHOD_LABEL[m.method] || m.method, Number(m.moneyIn), Number(m.moneyOut)]),
+          [],
+          ['Product', 'Unit', 'Sold', 'Sales', 'Cost', 'Profit'],
+          ...s.products.map((p) => [p.name, p.unit, Number(p.quantity), Number(p.sales), Number(p.cost), Number(p.profit)]),
+        ])}><Download className="size-4" aria-hidden /> Export</button>
         <button type="button" className="btn-quiet" onClick={onShop}><Store className="size-4" aria-hidden /> My shop</button>
       </SectionHead>
       <Segmented label="Time range" value={range} onChange={setRange} options={RANGES} />

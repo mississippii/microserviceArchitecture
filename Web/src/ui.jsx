@@ -78,44 +78,89 @@ export function FormSection({ icon: Icon, title, aside, children }) {
 export function Picker({ label, value, options, onChange, placeholder = 'Select', disabled, required }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
+  const [at, setAt] = useState(null) // desktop: where the dropdown sits, next to its field
+  const button = useRef(null)
   const cur = options.find((o) => String(o.value) === String(value ?? ''))
   const list = q ? options.filter((o) => o.label.toLowerCase().includes(q.trim().toLowerCase())) : options
+  const show = () => {
+    setQ('')
+    // Phones get a bottom sheet. From sm it is a dropdown under the field (above it when there is no room below).
+    if (window.matchMedia('(min-width: 640px)').matches) {
+      const r = button.current.getBoundingClientRect()
+      const below = window.innerHeight - r.bottom - 12
+      const up = below < 200 && r.top > below
+      setAt({ left: Math.min(r.left, window.innerWidth - Math.max(r.width, 200) - 8), width: Math.max(r.width, 200), maxHeight: Math.min(300, up ? r.top - 12 : below),
+        ...(up ? { bottom: window.innerHeight - r.top + 4 } : { top: r.bottom + 4 }) })
+    } else setAt(null)
+    setOpen(true)
+  }
+  const close = () => { setOpen(false); button.current?.focus() }
+  const choices = (compact) => (
+    <>
+      {options.length > 8 && (
+        <div className={`relative ${compact ? 'mb-1' : 'mb-2'}`}>
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" aria-hidden />
+          <input className={`input pl-9 ${compact ? 'min-h-9 py-1 text-sm' : ''}`} type="search" autoFocus placeholder="Search…" aria-label={`Search ${label}`} value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+      )}
+      <ul className={compact ? '' : '-mx-3 divide-y divide-line sm:-mx-4'} role="listbox" aria-label={label}>
+        {list.map((o, n) => {
+          const on = String(o.value) === String(value ?? '')
+          return (
+            <li key={o.value}>
+              <button type="button" role="option" aria-selected={on} autoFocus={compact && options.length <= 8 && (cur ? on : n === 0)} onClick={() => { onChange(o.value); close() }}
+                      className={`flex w-full items-center gap-3 text-left hover:bg-brand-50 focus-visible:bg-brand-50 ${compact ? 'min-h-9 rounded-md px-2.5' : 'min-h-12 px-4'} ${on ? 'font-semibold' : ''}`}>
+                <span className={`min-w-0 flex-1 truncate ${compact ? 'text-sm' : 'text-[15px]'}`}>{o.label}</span>
+                {o.hint && <span className="num shrink-0 text-xs text-muted">{o.hint}</span>}
+                {on && <Check className="size-4 shrink-0" aria-hidden />}
+              </button>
+            </li>
+          )
+        })}
+        {list.length === 0 && <li className={`text-center text-sm text-muted ${compact ? 'px-2 py-3' : 'px-4 py-6'}`}>No match</li>}
+      </ul>
+    </>
+  )
   return (
     <Field label={label}>
-      <button type="button" disabled={disabled} onClick={() => { setQ(''); setOpen(true) }} aria-haspopup="dialog"
+      <button ref={button} type="button" disabled={disabled} onClick={show} aria-haspopup="listbox" aria-expanded={open}
               className="input flex items-center gap-2 pr-2 text-left">
         <span className={`min-w-0 flex-1 truncate ${cur ? '' : 'text-muted/80'}`}>{cur?.label ?? placeholder}</span>
         <ChevronDown className="size-4 shrink-0 text-muted" aria-hidden />
       </button>
       {/* keeps native "please fill in" on submit */}
       {required && <input tabIndex={-1} aria-hidden required value={value ?? ''} onChange={() => {}} className="pointer-events-none absolute bottom-0 left-1/2 size-px opacity-0" />}
-      {open && (
-        <Drawer title={label} onClose={() => setOpen(false)}>
-          {options.length > 8 && (
-            <div className="relative mb-2">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" aria-hidden />
-              <input className="input pl-9" type="search" autoFocus placeholder="Search…" aria-label={`Search ${label}`} value={q} onChange={(e) => setQ(e.target.value)} />
-            </div>
-          )}
-          <ul className="-mx-3 divide-y divide-line sm:-mx-4" role="listbox" aria-label={label}>
-            {list.map((o) => {
-              const on = String(o.value) === String(value ?? '')
-              return (
-                <li key={o.value}>
-                  <button type="button" role="option" aria-selected={on} onClick={() => { onChange(o.value); setOpen(false) }}
-                          className={`flex min-h-12 w-full items-center gap-3 px-4 text-left hover:bg-brand-50 ${on ? 'font-semibold' : ''}`}>
-                    <span className="min-w-0 flex-1 truncate text-[15px]">{o.label}</span>
-                    {o.hint && <span className="num shrink-0 text-xs text-muted">{o.hint}</span>}
-                    {on && <Check className="size-4 shrink-0" aria-hidden />}
-                  </button>
-                </li>
-              )
-            })}
-            {list.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted">No match</li>}
-          </ul>
-        </Drawer>
-      )}
+      {open && !at && <Drawer compact title={label} onClose={close}>{choices(false)}</Drawer>}
+      {open && at && <Dropdown at={at} onClose={close}>{choices(true)}</Dropdown>}
     </Field>
+  )
+}
+
+/** Desktop dropdown: a small list fixed next to its field, above everything (so a form's scroll area can't clip it). */
+function Dropdown({ at, onClose, children }) {
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    const me = {}
+    openDrawers.push(me) // Escape closes this list, not the form sheet under it
+    const esc = (e) => { if (e.key === 'Escape' && openDrawers.at(-1) === me) close.current() }
+    const away = () => close.current() // the field moved: a stale position is worse than a closed list
+    document.addEventListener('keydown', esc)
+    window.addEventListener('resize', away)
+    return () => {
+      document.removeEventListener('keydown', esc)
+      window.removeEventListener('resize', away)
+      openDrawers.splice(openDrawers.indexOf(me), 1)
+    }
+  }, [])
+  return createPortal(
+    <div className="fixed inset-0 z-50" onClick={(e) => { e.stopPropagation(); onClose() }} onWheel={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={at} onClick={(e) => e.stopPropagation()}
+           className="fixed overflow-y-auto overscroll-contain rounded-xl bg-white p-1 shadow-[0_8px_24px_rgb(0_0_0/0.18)] ring-1 ring-line">
+        {children}
+      </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -300,12 +345,12 @@ export function LocateButton({ onPick, className = 'btn-quiet' }) {
     )
   }
   return (
-    <span className="inline-flex flex-col">
+    <span className={`flex-col ${className.includes('w-full') ? 'flex' : 'inline-flex'}`}>
       <button type="button" className={className} onClick={locate} disabled={busy}>
         <LocateFixed className="size-4" aria-hidden />
         {busy ? 'Finding you…' : 'Use my location'}
       </button>
-      {err && <span className="mt-1 max-w-56 text-xs text-madder-700">{err}</span>}
+      {err && <span role="alert" className="mt-1 text-xs text-madder-700">{err}</span>}
     </span>
   )
 }
@@ -399,12 +444,20 @@ export function Segmented({ options, value, onChange, label }) {
 export const initials = (name = '') => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
 
 /** Brand mark: a mango-yellow knot and a running stitch on white. */
-export function Mark({ className = 'size-8' }) {
+// The brand mark: the owner's bird logo (Pictures/site images/Logo.pdf), traced to vectors. No letter, so it survives a change of name.
+const BIRD_VIEWBOX = '174.0 172.0 676.1 676.1'
+const BIRD_INK = 'M666.7 815.4C668.3 786.7 652.7 753.0 626.3 728.0C604.6 707.5 591.1 699.1 550.6 681.0C520.2 667.4 495.5 655.2 483.7 647.9C452.7 628.7 427.7 599.7 413.7 567.0C406.1 549.1 404.4 542.7 397.4 506.5C388.5 460.1 364.5 426.5 330.6 413.0C306.0 403.1 281.2 405.8 262.6 420.4L258.6 423.5 L261.5 418.2C268.4 405.4 283.6 391.6 298.0 384.7C303.8 382.0 305.2 380.9 306.7 377.5C309.6 371.0 319.5 361.8 328.0 357.6C357.1 343.4 394.4 353.1 423.5 382.4C431.1 390.1 447.6 411.7 444.2 409.6C443.6 409.3 438.9 405.8 433.8 401.9C404.5 379.8 368.7 373.2 340.3 384.8C332.7 387.9 322.0 394.4 322.0 396.0C322.0 396.6 325.9 397.0 331.9 397.0C354.0 397.0 377.4 404.1 395.2 416.1C416.0 430.2 434.2 456.4 440.3 481.0L442.7 490.5 L444.0 483.0C451.7 437.2 472.7 396.5 505.4 363.7C538.8 330.1 574.8 309.7 641.0 286.8C704.2 264.9 745.9 236.9 761.7 205.5L766.2 196.5 L765.7 217.0C764.3 270.2 745.8 306.0 701.9 340.2C683.3 354.7 669.1 362.2 638.8 373.4C597.8 388.6 579.8 398.2 558.0 416.4C517.2 450.5 497.0 490.4 497.0 537.0C497.0 589.3 524.7 638.9 571.7 670.8C577.1 674.5 596.1 685.0 595.0 683.8C594.7 683.4 591.6 680.9 588.0 678.0C578.5 670.5 561.5 653.4 556.4 646.3C544.2 629.5 537.8 603.3 540.1 580.7C541.0 571.9 543.7 559.5 543.9 563.3C544.2 568.3 551.5 587.5 556.2 595.5C563.4 607.7 578.6 623.0 593.5 633.0C617.8 649.3 628.9 657.7 639.1 667.9C675.5 704.4 686.0 750.8 670.8 809.5C666.8 825.2 666.1 826.2 666.7 815.4Z'
+const BIRD_WING = 'M516.8 548.2C516.1 537.9 517.5 521.7 520.1 511.1C532.6 460.2 572.8 420.4 635.0 397.5C663.5 387.0 676.6 381.4 690.4 373.5C709.4 362.7 717.7 356.5 733.9 340.3C751.7 322.8 752.4 322.8 749.5 341.0C745.2 367.7 732.7 391.7 714.0 409.2C698.0 424.2 680.9 434.0 651.1 445.0C625.9 454.3 603.3 463.7 593.1 469.0C560.0 486.5 532.7 517.6 524.0 547.8C522.0 554.8 521.3 556.0 519.4 556.0C517.4 556.0 517.2 555.4 516.8 548.2Z'
+
+/** The brand mark: the bird in its own black and grey on a white disc, inside a thin black ring. inverse (black grounds, the footer): thin white ring, white bird. */
+export function Mark({ className = 'size-8', inverse = false }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <rect width="32" height="32" rx="9" fill="var(--color-brand-700)" />
-      <circle cx="10" cy="16" r="4" fill="white" />
-      <line x1="17" y1="16" x2="26" y2="16" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeDasharray="3.4 3.2" />
+    <svg viewBox={BIRD_VIEWBOX} className={className} aria-hidden>
+      <circle cx="512.0" cy="510.1" r="324.5" fill={inverse ? 'none' : '#fff'} stroke={inverse ? '#fff' : 'var(--color-ink)'} strokeWidth="27.0" />
+      <g transform="translate(512.0 510.1) scale(0.68) translate(-512.0 -510.1)">
+        <path fillRule="evenodd" fill={inverse ? '#fff' : 'var(--color-ink)'} d={BIRD_INK} />
+        <path fillRule="evenodd" fill="var(--color-fold)" d={BIRD_WING} />
+      </g>
     </svg>
   )
 }
@@ -416,7 +469,8 @@ const openDrawers = [] // Esc closes only the top sheet (a picker opened from a 
  * footer stays pinned under the scroll area: the total and the save button (as tradebazaar).
  * Rendered in a portal so it never sits inside a parent <label> or <form>.
  */
-export function Drawer({ title, onClose, wide, footer, children }) {
+/** compact: from sm a short centred modal (a dropdown's list of choices) instead of the full-height side panel. */
+export function Drawer({ title, onClose, wide, compact, footer, children }) {
   const close = useRef(onClose)
   close.current = onClose
   useEffect(() => {
@@ -432,9 +486,9 @@ export function Drawer({ title, onClose, wide, footer, children }) {
     }
   }, [])
   return createPortal(
-    <div className="fixed inset-0 z-40 m-0 flex items-end bg-black/45 sm:items-stretch sm:justify-end" onClick={onClose}>
+    <div className={`fixed inset-0 z-40 m-0 flex items-end bg-black/45 ${compact ? 'sm:items-center sm:justify-center sm:p-4' : 'sm:items-stretch sm:justify-end'}`} onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}
-           className={`flex max-h-[92dvh] w-full flex-col rounded-t-2xl bg-white sm:max-h-none sm:rounded-none ${wide ? 'sm:max-w-lg' : 'sm:max-w-md'}`}>
+           className={`flex w-full flex-col rounded-t-2xl bg-white ${compact ? 'max-h-[70dvh] sm:max-h-[min(28rem,80dvh)] sm:max-w-sm sm:rounded-2xl sm:shadow-[0_12px_40px_rgb(0_0_0/0.18)]' : `max-h-[92dvh] sm:max-h-none sm:rounded-none ${wide ? 'sm:max-w-lg' : 'sm:max-w-md'}`}`}>
         <div className="flex items-center gap-2 border-b border-line py-1 pr-1 pl-4">
           <h2 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title}</h2>
           <button type="button" className="inline-flex size-11 items-center justify-center rounded-lg text-muted hover:bg-brand-50 hover:text-ink" aria-label="Close" onClick={onClose}>

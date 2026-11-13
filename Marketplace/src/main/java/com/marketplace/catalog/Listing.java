@@ -19,7 +19,7 @@ public class Listing {
 
     private Long sellerId;
     private Long productId;
-    private BigDecimal price;
+    private BigDecimal price; // null until the seller sets one; such a listing is never active
     public enum Unit { PCS, KG, LITRE, DOZEN, BOX, CRATE, BAG, PACK }
 
     private BigDecimal stock;
@@ -29,5 +29,13 @@ public class Listing {
     private String sourceNote;
     private boolean active = true;
     private java.time.OffsetDateTime deletedAt; // removed from the shop; kept for history, revived by stocking it again
-    private BigDecimal costPrice; // average cost per unit, kept up to date by every receipt; private, used for profit
+    private BigDecimal costPrice;
+
+    // the seller's own words and pictures for this offer; customers see them on the product page
+    private String description;
+    private String ingredients;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.ARRAY)
+    @Column(columnDefinition = "text[]")
+    private String[] imageUrls = {};
+    private String videoUrl; // average cost per unit, kept up to date by every receipt; private, used for profit
 }

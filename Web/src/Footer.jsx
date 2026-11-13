@@ -1,15 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BRAND } from './brand'
+import { Mark } from './ui'
 
-function Mark() {
-  return (
-    <svg viewBox="0 0 32 32" className="size-6" aria-hidden>
-      <rect width="32" height="32" rx="9" fill="white" />
-      <circle cx="10" cy="16" r="4" fill="black" />
-      <line x1="17" y1="16" x2="26" y2="16" stroke="black" strokeWidth="2.8" strokeLinecap="round" strokeDasharray="3.4 3.2" />
-    </svg>
-  )
-}
 
 const link = 'inline-flex min-h-9 items-center text-[13px] text-neutral-400 transition-colors hover:text-white sm:min-h-7'
 
@@ -32,8 +24,8 @@ export default function Footer() {
         <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-[1.6fr_1fr_1fr_1fr] sm:gap-x-8">
           <div className="col-span-3 sm:col-span-1">
             <Link to="/" className="inline-flex items-center gap-2">
-              <Mark />
-              <span className="font-display text-base font-semibold text-white" translate="no">{BRAND.name}</span>
+              <Mark inverse className="size-6" />
+              <span className="font-display text-[15px] font-semibold tracking-[0.22em] text-white uppercase" translate="no">{BRAND.name}</span>
             </Link>
             <p className="mt-2 max-w-xs text-[13px] leading-relaxed">Original products from verified sellers, with a full refund if it isn&apos;t.</p>
           </div>

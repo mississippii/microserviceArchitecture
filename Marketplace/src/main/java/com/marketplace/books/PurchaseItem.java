@@ -19,4 +19,5 @@ public class PurchaseItem {
     private Long listingId;
     private BigDecimal quantity;
     private BigDecimal unitCost;
+    private Long batchId; // the goods on the shelf (catalog): what is left of this line, and its expiry date
 }
